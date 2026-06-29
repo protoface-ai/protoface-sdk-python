@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, cast
 
 __all__ = [
     "AuthenticationError",
@@ -175,7 +175,8 @@ def error_from_response(
     recognizable error envelope (e.g. a gateway returned HTML).
     """
     if _is_error_envelope(body):
-        error: Mapping[str, Any] = body["error"]  # type: ignore[index]
+        body_mapping = cast(Mapping[str, Any], body)
+        error = cast(Mapping[str, Any], body_mapping["error"])
         err_type = str(error.get("type", "internal" if status >= 500 else "invalid_request"))
         code = str(error.get("code", "unexpected_response"))
         message = str(error.get("message", f"Unexpected {status} response from the Protoface API."))

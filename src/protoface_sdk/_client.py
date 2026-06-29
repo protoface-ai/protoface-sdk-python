@@ -27,6 +27,7 @@ from protoface_sdk.models import (
     TransportConfig,
     UsageSummary,
 )
+from protoface_sdk.version import __version__
 
 DEFAULT_BASE_URL = "https://api.protoface.com"
 
@@ -67,7 +68,7 @@ class ProtofaceClient:
         headers = {
             "accept": "application/json",
             "authorization": f"Bearer {api_key}",
-            "user-agent": "protoface-sdk/0.1.0",
+            "user-agent": f"protoface-sdk/{__version__}",
         }
         if default_headers:
             headers.update(default_headers)
@@ -94,7 +95,7 @@ class ProtofaceClient:
         self._http.close()
 
     def get_status(self) -> StatusResponse:
-        """Public platform status roll-up (unauthenticated endpoint)."""
+        """Current platform status."""
         return StatusResponse.model_validate(self.request("GET", "/v1/status"))
 
     def list_billing_plans(self) -> list[PlanView]:

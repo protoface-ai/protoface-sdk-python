@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
+from typing import Any
 
 import httpx
 import pytest
@@ -16,6 +17,7 @@ from protoface_sdk import (
     RateLimitError,
     Session,
     SessionStatus,
+    __version__,
 )
 
 Handler = Callable[[httpx.Request], httpx.Response]
@@ -62,12 +64,13 @@ def _error_body(error_type: str, code: str, message: str = "boom") -> dict[str, 
 
 
 def test_create_session_success() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"
         assert request.url.path == "/v1/sessions"
         assert request.headers["authorization"] == "Bearer sk_live_test"
+        assert request.headers["user-agent"] == f"protoface-sdk/{__version__}"
         captured["body"] = json.loads(request.content)
         return httpx.Response(201, json=_session_body())
 
@@ -87,11 +90,11 @@ def test_create_session_success() -> None:
     assert isinstance(session, Session)
     assert session.id == "sess_01HXY"
     assert session.status is SessionStatus.queued
-    assert captured["body"]["avatar_id"] == "av_demo"  # type: ignore[index]
+    assert captured["body"]["avatar_id"] == "av_demo"
 
 
 def test_create_livekit_builds_transport_and_sends_idempotency_key() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         captured["body"] = json.loads(request.content)
@@ -111,21 +114,21 @@ def test_create_livekit_builds_transport_and_sends_idempotency_key() -> None:
     )
 
     body = captured["body"]
-    assert body["avatar_id"] == "av_demo"  # type: ignore[index]
-    assert body["transport"] == {  # type: ignore[index]
+    assert body["avatar_id"] == "av_demo"
+    assert body["transport"] == {
         "type": "livekit",
         "url": "wss://my-app.livekit.cloud",
         "room_name": "demo-room",
         "worker_token": "eyJ.fake",
         "audio_source": "data_stream",
     }
-    assert body["max_duration_seconds"] == 120  # type: ignore[index]
-    assert body["metadata"] == {"k": "v"}  # type: ignore[index]
+    assert body["max_duration_seconds"] == 120
+    assert body["metadata"] == {"k": "v"}
     assert captured["idempotency_key"] == "idem-123"
 
 
 def test_create_pipecat_session_success() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"
@@ -169,7 +172,7 @@ def test_create_pipecat_session_success() -> None:
     assert "/v1/pipecat/sessions/sess_test/media" in result.relay.media_url
 
 
-def test_get_status_unauthenticated_shape() -> None:
+def test_get_status_shape() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/v1/status"
         return httpx.Response(
@@ -213,7 +216,7 @@ def test_list_billing_plans_shape() -> None:
 
 
 def test_avatars_create_multipart_upload() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"
@@ -239,7 +242,7 @@ def test_avatars_create_multipart_upload() -> None:
     assert avatar.id == "av_new"
     assert avatar.status.value == "processing"
     assert "multipart/form-data" in str(captured["content_type"])
-    assert b"My Avatar" in bytes(captured["raw"])  # type: ignore[arg-type]
+    assert b"My Avatar" in captured["raw"]
 
 
 def test_list_sessions_pagination_shape() -> None:

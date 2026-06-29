@@ -1,6 +1,6 @@
 [project]
 name = "protoface-sdk"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Official Python SDK for the Protoface API."
 requires-python = ">=3.10"
 readme = "README.md"
@@ -12,6 +12,7 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -28,8 +29,6 @@ Homepage = "https://protoface.com"
 Documentation = "https://docs.protoface.com"
 Source = "https://github.com/protoface-ai/protoface-sdk-python"
 
-# Codegen for src/protoface_sdk/_generated.py. Run `make generate` (see README).
-# Kept out of the runtime deps; only needed when regenerating models.
 [dependency-groups]
 dev = [
   "build>=1.2",
@@ -46,6 +45,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/protoface_sdk"]
+
+[tool.hatch.version]
+path = "src/protoface_sdk/version.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -93,3 +95,6 @@ reportUnknownArgumentType = false
 reportMissingImports = "error"
 reportUntypedFunctionDecorator = "warning"
 reportPrivateUsage = "warning"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

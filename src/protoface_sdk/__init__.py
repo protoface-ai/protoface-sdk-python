@@ -54,8 +54,7 @@ from protoface_sdk.models import (
     UsageSummary,
     WebSocketTransportConfig,
 )
-
-__version__ = "0.1.0"
+from protoface_sdk.version import __version__
 
 __all__ = [
     "DEFAULT_BASE_URL",

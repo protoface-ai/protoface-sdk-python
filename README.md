@@ -46,7 +46,7 @@ client.pipecat.sessions.create(avatar_id=...)                  # Pipecat relay b
 client.usage.summary(period="current_month")                   # or period_start/period_end
 
 client.list_billing_plans()
-client.get_status()                                            # unauthenticated platform status
+client.get_status()
 ```
 
 `Page` objects expose `.data`, `.has_more`, and `.next_cursor`. Pass
@@ -121,7 +121,14 @@ with ProtofaceClient(api_key=...) as client:
 Wire models in `src/protoface_sdk/_generated.py` are generated from
 `apispec/openapi.json`.
 
+The canonical public OpenAPI spec is emitted from the private Protoface monorepo
+at `apispec/openapi.json`. This repo vendors a copy so SDK builds are
+reproducible. `protoface-docs/openapi.json` is downstream Mintlify input and
+should not be used as the SDK source of truth.
+
 ```sh
+make sync-openapi  # copy ../protoface/apispec/openapi.json and regenerate models
+make openapi-check # compare the vendored spec with the sibling monorepo copy
 make generate       # regenerate src/protoface_sdk/_generated.py from the spec
 make lint           # ruff check + format --check
 make type           # pyright (strict)

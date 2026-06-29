@@ -1,0 +1,20 @@
+.github/workflows/ci.yml
+  s_102ee28b9abd3e::t_7864daee70cd8f 12,42,48
+  s_102ee28b9abd3e::t_164e2aff2687b0 3-5,14,24,27,30,32,35,38,41,43-45,47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "c88370174882c10e48405860bbfcdb4eaee9efdd",
+  "prompts": {},
+  "sessions": {
+    "s_102ee28b9abd3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f14c1-bfec-7191-81a4-7f6b76564de7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    }
+  }
+}

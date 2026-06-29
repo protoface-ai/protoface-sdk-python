@@ -6,11 +6,19 @@ typed backend SDK for the public HTTP API, built on
 
 Install the `protoface-sdk` distribution and import the `protoface_sdk` package.
 
-## Install
+## Installation
 
 ```sh
 pip install protoface-sdk
 ```
+
+Or with uv:
+
+```sh
+uv add protoface-sdk
+```
+
+Requires Python 3.10+ and a Protoface API key.
 
 ## Quickstart
 
@@ -52,7 +60,7 @@ client.get_status()
 `Page` objects expose `.data`, `.has_more`, and `.next_cursor`. Pass
 `.next_cursor` back as `starting_after` to fetch the next page.
 
-## Starting sessions
+## LiveKit sessions
 
 `client.sessions.create_livekit(...)` starts the backend worker for a
 customer-owned LiveKit room. Your application still owns the LiveKit room and
@@ -64,7 +72,7 @@ session = client.sessions.create_livekit(
     avatar_id="av_stock_001",
     url=os.environ["LIVEKIT_URL"],
     room_name="demo-room",
-    worker_token=worker_token,
+    worker_token=os.environ["LIVEKIT_WORKER_TOKEN"],
 )
 
 session = session.wait_until_running(timeout=10)
@@ -119,12 +127,8 @@ with ProtofaceClient(api_key=...) as client:
 ## Development
 
 Wire models in `src/protoface_sdk/_generated.py` are generated from
-`apispec/openapi.json`.
-
-The canonical public OpenAPI spec is emitted from the private Protoface monorepo
-at `apispec/openapi.json`. This repo vendors a copy so SDK builds are
-reproducible. `protoface-docs/openapi.json` is downstream Mintlify input and
-should not be used as the SDK source of truth.
+`apispec/openapi.json`. Maintainers should sync that file from the canonical
+monorepo spec with `make sync-openapi`.
 
 ```sh
 make sync-openapi  # copy ../protoface/apispec/openapi.json and regenerate models
@@ -138,3 +142,7 @@ make build          # wheel/sdist build + twine check
 
 `make generate` runs `datamodel-code-generator` and then normalizes the output
 with `ruff format` and `ruff check --fix`.
+
+## License
+
+Apache-2.0 - see [LICENSE](LICENSE).

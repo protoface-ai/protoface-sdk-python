@@ -1,0 +1,46 @@
+src/protoface_sdk/__init__.py
+  s_102ee28b9abd3e::t_684a56b1ab70fe 57
+src/protoface_sdk/_client.py
+  s_102ee28b9abd3e::t_9c7e3baf382efa 30,71,98
+pyproject.toml
+  s_102ee28b9abd3e::t_57ce3964e07f4d 3,15,49-51,98-100
+src/protoface_sdk/errors.py
+  s_102ee28b9abd3e::t_72015de56ed4e3 6,178-179
+tests/test_client.py
+  s_102ee28b9abd3e::t_573463e863d88e 7,20,67,73,93,97,117-118,125-126,131,175,219,245
+src/protoface_sdk/version.py
+  s_102ee28b9abd3e::t_587c92963d0b09 1
+README.md
+  s_102ee28b9abd3e::t_af077cca6764af 49
+  s_102ee28b9abd3e::t_15515fed34b6b7 124-128,130-131
+Makefile
+  s_102ee28b9abd3e::t_490e7826cc2ad2 1,5,18-25
+  s_102ee28b9abd3e::t_c675bd32be354b 13
+  s_ebd371b4ab3009::t_cb705c13765320 26
+uv.lock
+  s_102ee28b9abd3e::t_9b9bc45a53a522 460
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "36b8c103b08804a7c9b98f1450c8f49c11eb5752",
+  "prompts": {},
+  "sessions": {
+    "s_102ee28b9abd3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f14c1-bfec-7191-81a4-7f6b76564de7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    },
+    "s_ebd371b4ab3009": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f159e-b352-7fb1-b084-baee5cdea5d2",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    }
+  }
+}

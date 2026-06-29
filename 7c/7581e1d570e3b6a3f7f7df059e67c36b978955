@@ -1,0 +1,45 @@
+pyproject.toml
+  s_102ee28b9abd3e::t_ffd640cbcf02ca 1-95
+tests/test_coverage.py
+  s_102ee28b9abd3e::t_b8cfc96b8c901a 1-38
+tests/test_models.py
+  s_102ee28b9abd3e::t_8b8dc4eaaa27e9 1-144
+README.md
+  s_102ee28b9abd3e::t_543ea126bdef87 1,3-5,7-136
+.github/workflows/ci.yml
+  s_102ee28b9abd3e::t_0ac4d56f2e60d4 1-49
+Makefile
+  s_102ee28b9abd3e::t_f104c46fc2b715 1-35
+apispec/openapi.json
+  s_102ee28b9abd3e::t_d5d881f6f02ad7 1-2127
+src/protoface_sdk/__init__.py
+  s_102ee28b9abd3e::t_61b12d65e9ceab 1-114
+src/protoface_sdk/_client.py
+  s_102ee28b9abd3e::t_c9759cd0c161b3 1-469
+src/protoface_sdk/_generated.py
+  s_102ee28b9abd3e::t_cf26e8b1fd481d 1-507
+src/protoface_sdk/errors.py
+  s_102ee28b9abd3e::t_5710de053e1e90 1-244
+src/protoface_sdk/models.py
+  s_102ee28b9abd3e::t_e504e29328e2cf 1-146
+tests/test_client.py
+  s_102ee28b9abd3e::t_124c0ed9746e1c 1-407
+uv.lock
+  s_102ee28b9abd3e::t_028d855c474aba 1-1328
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "7c7581e1d570e3b6a3f7f7df059e67c36b978955",
+  "prompts": {},
+  "sessions": {
+    "s_102ee28b9abd3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f14c1-bfec-7191-81a4-7f6b76564de7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    }
+  }
+}

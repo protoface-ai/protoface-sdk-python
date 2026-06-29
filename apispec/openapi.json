@@ -1,0 +1,2127 @@
+{
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "additionalProperties": false,
+        "description": "Concrete error returned inside `ApiErrorEnvelope.error`.",
+        "properties": {
+          "code": {
+            "description": "Stable machine-readable subcode (lower_snake_case). SDKs should switch on this, not `message`.",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable summary. Not stable; do not parse.",
+            "type": "string"
+          },
+          "param": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Offending request field (dot-path), if applicable."
+          },
+          "request_id": {
+            "description": "Echo of the `X-Request-Id` response header for support.",
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ErrorType"
+          }
+        },
+        "required": [
+          "type",
+          "code",
+          "message",
+          "request_id"
+        ],
+        "title": "ApiError",
+        "type": "object"
+      },
+      "ApiErrorEnvelope": {
+        "additionalProperties": false,
+        "description": "Wire format for every non-2xx public API response.",
+        "examples": [
+          {
+            "error": {
+              "code": "transport.unsupported",
+              "message": "transport.type=pipecat is not supported",
+              "param": "transport.type",
+              "request_id": "req_01HXY5K8E7QYG3X8Z6N9R7S0VR",
+              "type": "invalid_request"
+            }
+          }
+        ],
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ApiErrorEnvelope",
+        "type": "object"
+      },
+      "Avatar": {
+        "additionalProperties": false,
+        "description": "Public Avatar resource returned by `GET /v1/avatars` and `GET /v1/avatars/{id}`.",
+        "examples": [
+          {
+            "created_at": "2026-01-01T00:00:00Z",
+            "default_voice": "Charon",
+            "id": "av_stock_001",
+            "is_demo": true,
+            "name": "Stock Avatar 001",
+            "object": "avatar",
+            "runtime_type": "avtr1",
+            "status": "ready"
+          }
+        ],
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "default_custom_instructions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Preferred managed-conversation instructions for this avatar, when configured."
+          },
+          "default_voice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Preferred conversation voice for this avatar, when configured."
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Human-readable reason the build failed (e.g. `No face detected in source image.`). Only set while `status` is `failed`."
+          },
+          "id": {
+            "description": "Stable `av_\u2026` avatar id. Platform stock avatars use fixed ids such as `av_stock_001`; customer avatars use generated ids.",
+            "type": "string"
+          },
+          "is_demo": {
+            "description": "True for platform stock avatars (e.g. `av_stock_001`).",
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "object": {
+            "const": "avatar",
+            "default": "avatar",
+            "type": "string"
+          },
+          "runtime_type": {
+            "description": "Runtime that serves this avatar (e.g. `mock`, `avtr1`).",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AvatarStatus"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "runtime_type",
+          "is_demo",
+          "created_at"
+        ],
+        "title": "Avatar",
+        "type": "object"
+      },
+      "AvatarList": {
+        "additionalProperties": false,
+        "description": "Cursor-paginated list of avatars.",
+        "examples": [
+          {
+            "data": [],
+            "has_more": false,
+            "object": "list"
+          }
+        ],
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Avatar"
+            },
+            "type": "array"
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Pass as `starting_after` on the next request to continue."
+          },
+          "object": {
+            "const": "list",
+            "default": "list",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "has_more"
+        ],
+        "title": "AvatarList",
+        "type": "object"
+      },
+      "AvatarStatus": {
+        "description": "Lifecycle of a custom avatar.\n\n`ready` \u2014 usable for sessions.\n`processing` \u2014 being fitted / converted.\n`failed` \u2014 fitting failed; will not be usable without re-upload.",
+        "enum": [
+          "ready",
+          "processing",
+          "failed"
+        ],
+        "title": "AvatarStatus",
+        "type": "string"
+      },
+      "Body_create_avatar": {
+        "properties": {
+          "image": {
+            "contentMediaType": "application/octet-stream",
+            "description": "Portrait image (PNG or JPEG).",
+            "type": "string"
+          },
+          "name": {
+            "default": "Custom Avatar",
+            "description": "Display name for the avatar.",
+            "type": "string"
+          },
+          "runtime_type": {
+            "default": "avtr1",
+            "description": "Build stack. Default `avtr1`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "title": "Body_create_avatar",
+        "type": "object"
+      },
+      "ErrorType": {
+        "description": "Top-level error categories. Maps roughly to HTTP status.\n\n`code` (a free-form lower_snake_case string on `ApiError`) is the\nmachine-readable subcode SDKs should switch on; `type` is the broad\ncategory.",
+        "enum": [
+          "invalid_request",
+          "authentication",
+          "permission",
+          "not_found",
+          "conflict",
+          "unprocessable",
+          "rate_limit",
+          "quota_exceeded",
+          "internal",
+          "service_unavailable"
+        ],
+        "title": "ErrorType",
+        "type": "string"
+      },
+      "LiveKitAudioSource": {
+        "description": "How the LiveKit worker receives audio from the room.\n\nUse `data_stream` with the LiveKit Agents plugin. Use `track` only for\ncustom integrations that publish audio tracks directly.",
+        "enum": [
+          "data_stream",
+          "track"
+        ],
+        "title": "LiveKitAudioSource",
+        "type": "string"
+      },
+      "LiveKitTransportConfig": {
+        "additionalProperties": false,
+        "description": "BYO LiveKit transport.\n\nThe customer owns the room and mints `worker_token`; we never touch\ntheir LiveKit API key or secret.",
+        "examples": [
+          {
+            "audio_source": "data_stream",
+            "room_name": "demo-room",
+            "type": "livekit",
+            "url": "wss://my-app.livekit.cloud",
+            "worker_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        ],
+        "properties": {
+          "audio_source": {
+            "$ref": "#/components/schemas/LiveKitAudioSource",
+            "default": "data_stream",
+            "description": "How the worker receives audio. See LiveKitAudioSource."
+          },
+          "room_name": {
+            "description": "Name of the LiveKit room the worker should join.",
+            "type": "string"
+          },
+          "subscribe_to_identity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When `audio_source=track`, pin to this participant. Ignored otherwise."
+          },
+          "synthetic_audio_if_no_input": {
+            "default": false,
+            "description": "If True and no participant joins within 10 s, the worker falls back to a synthetic sine generator. Demo aid only; default off.",
+            "type": "boolean"
+          },
+          "type": {
+            "const": "livekit",
+            "default": "livekit",
+            "type": "string"
+          },
+          "url": {
+            "description": "Customer's LiveKit URL, e.g. `wss://my-app.livekit.cloud`.",
+            "type": "string"
+          },
+          "worker_identity": {
+            "default": "protoface-worker",
+            "description": "Identity the worker presents inside the room.",
+            "type": "string"
+          },
+          "worker_token": {
+            "description": "Short-lived JWT the customer mints authorizing our worker to join the room. **Write-only.** Never echoed back on read; `GET /v1/sessions/{id}.transport.worker_token` returns the string `\"[redacted]\"`.",
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "url",
+          "room_name",
+          "worker_token"
+        ],
+        "title": "LiveKitTransportConfig",
+        "type": "object"
+      },
+      "PipecatSessionCreateRequest": {
+        "additionalProperties": false,
+        "description": "Start request for a Pipecat avatar media session.",
+        "properties": {
+          "avatar_id": {
+            "description": "Stable `av_...` avatar id.",
+            "type": "string"
+          },
+          "idle_timeout_seconds": {
+            "default": 30,
+            "maximum": 600.0,
+            "minimum": 1.0,
+            "type": "integer"
+          },
+          "max_duration_seconds": {
+            "anyOf": [
+              {
+                "maximum": 3600.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/QualityTier",
+            "default": "standard"
+          },
+          "relay_mode": {
+            "const": "websocket",
+            "default": "websocket",
+            "type": "string"
+          }
+        },
+        "required": [
+          "avatar_id"
+        ],
+        "title": "PipecatSessionCreateRequest",
+        "type": "object"
+      },
+      "PipecatSessionView": {
+        "additionalProperties": false,
+        "description": "Pipecat avatar media session.",
+        "properties": {
+          "object": {
+            "const": "pipecat.session",
+            "default": "pipecat.session",
+            "type": "string"
+          },
+          "relay": {
+            "$ref": "#/components/schemas/PipecatWebSocketRelayView"
+          },
+          "session": {
+            "$ref": "#/components/schemas/Session"
+          }
+        },
+        "required": [
+          "session",
+          "relay"
+        ],
+        "title": "PipecatSessionView",
+        "type": "object"
+      },
+      "PipecatTransportConfig": {
+        "additionalProperties": false,
+        "description": "Reserved \u2014 BYO Pipecat transport.\n\n`POST /v1/sessions` still rejects `transport.type=pipecat`; use\n`POST /v1/pipecat/sessions` for the Protoface Pipecat video service.",
+        "properties": {
+          "type": {
+            "const": "pipecat",
+            "default": "pipecat",
+            "type": "string"
+          }
+        },
+        "title": "PipecatTransportConfig",
+        "type": "object"
+      },
+      "PipecatWebSocketRelayView": {
+        "additionalProperties": false,
+        "description": "Short-lived direct media connection details for the Pipecat plugin.",
+        "properties": {
+          "audio_sample_rate": {
+            "type": "integer"
+          },
+          "decoded_video_format": {
+            "const": "RGB",
+            "type": "string"
+          },
+          "media_token": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "media_url": {
+            "type": "string"
+          },
+          "protocol": {
+            "type": "string"
+          },
+          "supports_audio_output": {
+            "type": "boolean"
+          },
+          "type": {
+            "const": "websocket",
+            "default": "websocket",
+            "type": "string"
+          },
+          "video_encoding": {
+            "enum": [
+              "jpeg",
+              "rgb24"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "protocol",
+          "media_url",
+          "media_token",
+          "audio_sample_rate",
+          "video_encoding",
+          "decoded_video_format",
+          "supports_audio_output"
+        ],
+        "title": "PipecatWebSocketRelayView",
+        "type": "object"
+      },
+      "PlanView": {
+        "additionalProperties": false,
+        "properties": {
+          "custom_avatar_slots": {
+            "type": "integer"
+          },
+          "extra_avatar_slot_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "extra_credit_unit_micros": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "included_credits": {
+            "type": "integer"
+          },
+          "key": {
+            "type": "string"
+          },
+          "max_concurrency": {
+            "type": "integer"
+          },
+          "monthly_price_cents": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "session_time_limit_seconds": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "monthly_price_cents",
+          "included_credits",
+          "extra_credit_unit_micros",
+          "max_concurrency",
+          "custom_avatar_slots",
+          "extra_avatar_slot_cents",
+          "session_time_limit_seconds"
+        ],
+        "title": "PlanView",
+        "type": "object"
+      },
+      "QualityTier": {
+        "description": "Output quality tier.",
+        "enum": [
+          "mock",
+          "lite",
+          "standard",
+          "pro"
+        ],
+        "title": "QualityTier",
+        "type": "string"
+      },
+      "Session": {
+        "additionalProperties": false,
+        "description": "Public session resource \u2014 what `GET /v1/sessions/{id}` returns.",
+        "examples": [
+          {
+            "avatar_id": "av_stock_001",
+            "created_at": "2026-05-25T19:00:00.123Z",
+            "first_frame_at": "2026-05-25T19:00:02.001Z",
+            "id": "sess_01HXY5K8E7QYG3X8Z6N9R7S0VR",
+            "idle_timeout_seconds": 30,
+            "max_duration_seconds": 600,
+            "metadata": {
+              "customer_session_id": "abc123"
+            },
+            "object": "session",
+            "quality": "standard",
+            "started_at": "2026-05-25T19:00:01.456Z",
+            "status": "running",
+            "transport": {
+              "audio_source": "data_stream",
+              "room_name": "demo-room",
+              "type": "livekit",
+              "url": "wss://my-app.livekit.cloud"
+            },
+            "usage": {
+              "billable_seconds": 12,
+              "frames": 300
+            }
+          }
+        ],
+        "properties": {
+          "avatar_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "failed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "failure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionFailure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "first_frame_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set on `session.first_frame`."
+          },
+          "id": {
+            "description": "`sess_\u2026` prefixed ULID.",
+            "type": "string"
+          },
+          "idle_timeout_seconds": {
+            "type": "integer"
+          },
+          "max_duration_seconds": {
+            "type": "integer"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object"
+          },
+          "object": {
+            "const": "session",
+            "default": "session",
+            "type": "string"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/QualityTier"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when worker emits `session.starting`."
+          },
+          "status": {
+            "$ref": "#/components/schemas/SessionStatus"
+          },
+          "transport": {
+            "discriminator": {
+              "mapping": {
+                "livekit": "#/components/schemas/LiveKitTransportConfig",
+                "pipecat": "#/components/schemas/PipecatTransportConfig",
+                "websocket": "#/components/schemas/WebSocketTransportConfig"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LiveKitTransportConfig"
+              },
+              {
+                "$ref": "#/components/schemas/WebSocketTransportConfig"
+              },
+              {
+                "$ref": "#/components/schemas/PipecatTransportConfig"
+              }
+            ]
+          },
+          "usage": {
+            "$ref": "#/components/schemas/SessionUsage"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "avatar_id",
+          "transport",
+          "quality",
+          "max_duration_seconds",
+          "idle_timeout_seconds",
+          "metadata",
+          "created_at"
+        ],
+        "title": "Session",
+        "type": "object"
+      },
+      "SessionCreateRequest": {
+        "additionalProperties": false,
+        "description": "Request body for `POST /v1/sessions`.",
+        "examples": [
+          {
+            "avatar_id": "av_stock_001",
+            "idle_timeout_seconds": 30,
+            "max_duration_seconds": 600,
+            "metadata": {
+              "customer_session_id": "abc123"
+            },
+            "quality": "standard",
+            "transport": {
+              "room_name": "demo-room",
+              "type": "livekit",
+              "url": "wss://my-app.livekit.cloud",
+              "worker_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            }
+          }
+        ],
+        "properties": {
+          "avatar_id": {
+            "description": "Stable `av_\u2026` avatar id. Must reference a platform stock avatar or customer avatar the caller's API key can access.",
+            "type": "string"
+          },
+          "idle_timeout_seconds": {
+            "default": 30,
+            "description": "End the session automatically after this many seconds without received audio. Only applies to transports that observe inbound audio; ignored otherwise.",
+            "maximum": 600.0,
+            "minimum": 1.0,
+            "type": "integer"
+          },
+          "max_duration_seconds": {
+            "anyOf": [
+              {
+                "maximum": 3600.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional customer-requested hard ceiling on session duration. The API clamps this to the caller's plan limit and returns the effective value on the Session resource."
+          },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "Customer-owned free-form JSON, <= 8 KB. Keys prefixed with `_avatar.` are managed by Protoface.",
+            "type": "object"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/QualityTier",
+            "default": "standard",
+            "description": "Quality tier; drives the billing multiplier."
+          },
+          "transport": {
+            "description": "Discriminated union of transport configs, keyed by `type`.",
+            "discriminator": {
+              "mapping": {
+                "livekit": "#/components/schemas/LiveKitTransportConfig",
+                "pipecat": "#/components/schemas/PipecatTransportConfig",
+                "websocket": "#/components/schemas/WebSocketTransportConfig"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LiveKitTransportConfig"
+              },
+              {
+                "$ref": "#/components/schemas/WebSocketTransportConfig"
+              },
+              {
+                "$ref": "#/components/schemas/PipecatTransportConfig"
+              }
+            ]
+          }
+        },
+        "required": [
+          "avatar_id",
+          "transport"
+        ],
+        "title": "SessionCreateRequest",
+        "type": "object"
+      },
+      "SessionFailure": {
+        "additionalProperties": false,
+        "description": "Populated when `Session.status == failed`.",
+        "properties": {
+          "code": {
+            "description": "Stable lower_snake_case subcode.",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable summary; not stable.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "SessionFailure",
+        "type": "object"
+      },
+      "SessionList": {
+        "additionalProperties": false,
+        "description": "Cursor-paginated list of sessions.",
+        "examples": [
+          {
+            "data": [],
+            "has_more": false,
+            "object": "list"
+          }
+        ],
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Session"
+            },
+            "type": "array"
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Pass as `starting_after` on the next request to continue."
+          },
+          "object": {
+            "const": "list",
+            "default": "list",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data",
+          "has_more"
+        ],
+        "title": "SessionList",
+        "type": "object"
+      },
+      "SessionStatus": {
+        "description": "Public session lifecycle.\n\nTerminal states are `ended`, `failed`, `canceled`. `ending` is the\ngraceful-drain state while a worker finishes publishing in-flight frames.",
+        "enum": [
+          "created",
+          "queued",
+          "starting",
+          "running",
+          "ending",
+          "ended",
+          "failed",
+          "canceled"
+        ],
+        "title": "SessionStatus",
+        "type": "string"
+      },
+      "SessionUsage": {
+        "additionalProperties": false,
+        "description": "Live usage counters embedded in the Session resource.\n\nEventually-consistent \u2014 lags the latest worker heartbeat by up to\none interval. Canonical billing data lives in `UsageEvent`.",
+        "properties": {
+          "billable_seconds": {
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "frames": {
+            "minimum": 0.0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "billable_seconds",
+          "frames"
+        ],
+        "title": "SessionUsage",
+        "type": "object"
+      },
+      "StatusComponent": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "operational",
+              "degraded",
+              "outage"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status"
+        ],
+        "title": "StatusComponent",
+        "type": "object"
+      },
+      "StatusResponse": {
+        "additionalProperties": false,
+        "description": "`GET /v1/status` response.",
+        "properties": {
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/StatusComponent"
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": "Roll-up of all components.",
+            "enum": [
+              "operational",
+              "degraded",
+              "outage"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "components",
+          "updated_at"
+        ],
+        "title": "StatusResponse",
+        "type": "object"
+      },
+      "UsageSummary": {
+        "additionalProperties": false,
+        "description": "Aggregated usage; returned by `GET /v1/usage`.",
+        "examples": [
+          {
+            "billable_seconds": 14280,
+            "by_quality": {
+              "pro": 2280,
+              "standard": 12000
+            },
+            "period_end": "2026-05-25T19:00:00Z",
+            "period_start": "2026-05-01T00:00:00Z",
+            "sessions": 42
+          }
+        ],
+        "properties": {
+          "billable_seconds": {
+            "description": "Total billable seconds across all sessions in the window.",
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "by_quality": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "`billable_seconds` per quality tier. Forward-compatible breakdown \u2014 additional `by_*` slices may appear over time.",
+            "propertyNames": {
+              "$ref": "#/components/schemas/QualityTier"
+            },
+            "type": "object"
+          },
+          "period_end": {
+            "description": "Exclusive end of the aggregated window. Matches the `period_end` query argument.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "period_start": {
+            "description": "Inclusive start of the aggregated window. Matches the `period_start` query argument.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "sessions": {
+            "description": "Number of sessions that contributed usage in the window.",
+            "minimum": 0.0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "period_start",
+          "period_end",
+          "billable_seconds",
+          "sessions"
+        ],
+        "title": "UsageSummary",
+        "type": "object"
+      },
+      "WebSocketTransportConfig": {
+        "additionalProperties": false,
+        "description": "Reserved \u2014 raw WebSocket transport. **Not yet available.**\n\nListed in the schema so existing clients keep parsing future responses,\nbut `POST /v1/sessions` rejects it today with\n`invalid_request` / `code=transport.unsupported`.",
+        "properties": {
+          "type": {
+            "const": "websocket",
+            "default": "websocket",
+            "type": "string"
+          }
+        },
+        "title": "WebSocketTransportConfig",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "ApiKey": {
+        "bearerFormat": "sk_live_*",
+        "description": "Live API key minted in the dashboard. Pass as `Authorization: Bearer sk_live_\u2026`. Keys are scoped to a single environment (staging / prod).",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Create realtime avatar sessions.\n\n### Authentication\nAll `/v1/*` endpoints require a live API key:\n\n```\nAuthorization: Bearer sk_live_...\n```\n\nKeys are minted in the dashboard and are scoped to a single environment\n(staging or prod).\n\n### Idempotency\n`POST /v1/sessions` may include an `Idempotency-Key` header (any opaque string,\n<= 255 chars). Retries with the same key inside 24 hours return the first\nresponse. The header is optional.\n\n### Errors\nEvery non-2xx response is a JSON body of the form:\n\n```json\n{\n  \"error\": {\n    \"type\": \"invalid_request\",\n    \"code\": \"transport.unsupported\",\n    \"message\": \"transport.type=pipecat is not supported\",\n    \"param\": \"transport.type\",\n    \"request_id\": \"req_01HXY...\"\n  }\n}\n```\n\nSwitch on `error.code` (stable lower_snake_case), not `error.message`.\n\n### Pagination\nList endpoints use cursor pagination:\n\n```\nGET /v1/sessions?limit=20&starting_after=sess_01HXY...\n```\n\nResponse shape:\n\n```json\n{\n  \"object\": \"list\",\n  \"data\": [...],\n  \"has_more\": true,\n  \"next_cursor\": \"sess_01HXY...\"\n}\n```\n",
+    "summary": "Protoface \u2014 realtime avatar API for developers.",
+    "title": "Protoface API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/avatars": {
+      "get": {
+        "description": "List avatars available to the calling org. Includes platform-built-in stock avatars (e.g. `av_stock_001`) and any customer-uploaded avatars.",
+        "operationId": "list_avatars",
+        "parameters": [
+          {
+            "description": "Page size. Default 20, max 100.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "description": "Page size. Default 20, max 100.",
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Pagination cursor \u2014 an `av_\u2026` id from a previous page.",
+            "in": "query",
+            "name": "starting_after",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor \u2014 an `av_\u2026` id from a previous page.",
+              "title": "Starting After"
+            }
+          },
+          {
+            "description": "Which avatars to return: `all` (default \u2014 platform stock plus your org's), `platform` (only built-in stock), or `org` (only your custom).",
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "description": "Which avatars to return: `all` (default \u2014 platform stock plus your org's), `platform` (only built-in stock), or `org` (only your custom).",
+              "enum": [
+                "all",
+                "platform",
+                "org"
+              ],
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Case-insensitive substring filter on avatar name or id.",
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Case-insensitive substring filter on avatar name or id.",
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body or parameters failed validation."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "List avatars",
+        "tags": [
+          "avatars"
+        ]
+      },
+      "post": {
+        "description": "Upload a portrait image to build a custom avatar. Returns the avatar in `processing`; poll `GET /v1/avatars/{id}` until it is `ready` (or `failed`). `multipart/form-data`: `image` (PNG/JPEG), `name`, and optional `runtime_type` (default `avtr1`).",
+        "operationId": "create_avatar",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_avatar"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Avatar"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unsupported image or stack."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "Create a custom avatar from an image",
+        "tags": [
+          "avatars"
+        ]
+      }
+    },
+    "/v1/avatars/{avatar_id}": {
+      "delete": {
+        "description": "Delete a custom avatar and permanently remove its uploaded source image and built assets. The avatar disappears from listings and can no longer run sessions; past session and usage records are kept. Platform stock avatars cannot be deleted.",
+        "operationId": "delete_avatar",
+        "parameters": [
+          {
+            "description": "Stable `av_\u2026` avatar id.",
+            "in": "path",
+            "name": "avatar_id",
+            "required": true,
+            "schema": {
+              "description": "Stable `av_\u2026` avatar id.",
+              "title": "Avatar Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Platform avatars are not deletable."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "No avatar with that id."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body or parameters failed validation."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "Delete an avatar",
+        "tags": [
+          "avatars"
+        ]
+      },
+      "get": {
+        "description": "Return a single avatar by id.",
+        "operationId": "get_avatar",
+        "parameters": [
+          {
+            "description": "Stable `av_\u2026` avatar id.",
+            "in": "path",
+            "name": "avatar_id",
+            "required": true,
+            "schema": {
+              "description": "Stable `av_\u2026` avatar id.",
+              "title": "Avatar Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Avatar"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "No avatar with that id."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body or parameters failed validation."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "Retrieve an avatar",
+        "tags": [
+          "avatars"
+        ]
+      }
+    },
+    "/v1/billing/plans": {
+      "get": {
+        "description": "Return the current Protoface billing plan catalog. This endpoint is unauthenticated so signup and pricing UI can render the same catalog used by checkout and enforcement.",
+        "operationId": "list_billing_plans",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PlanView"
+                  },
+                  "title": "Response List Billing Plans",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body or parameters failed validation."
+          }
+        },
+        "summary": "List billing plans",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/pipecat/sessions": {
+      "post": {
+        "description": "Start a Protoface avatar session for Pipecat. The response contains short-lived WebSocket media credentials used by the `pipecat-protoface` package.",
+        "operationId": "create_pipecat_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PipecatSessionCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipecatSessionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Invalid request body."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Insufficient credits or inactive billing."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Avatar not ready."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body or parameters failed validation."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Pipecat relay unavailable."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "Create a Pipecat avatar media session",
+        "tags": [
+          "pipecat"
+        ]
+      }
+    },
+    "/v1/sessions": {
+      "get": {
+        "description": "List sessions for the calling org, newest first. Repeatable `status` filters OR together; the group aliases `active` and `terminal` expand to the underlying status set. `created_after` / `created_before` accept ISO-8601 UTC. Paginate with `limit` + `starting_after=<last_session_id>`.",
+        "operationId": "list_sessions",
+        "parameters": [
+          {
+            "description": "Repeatable filter. Accepts a `SessionStatus` value or the aliases `active` / `terminal`. Multiple values OR together.",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Repeatable filter. Accepts a `SessionStatus` value or the aliases `active` / `terminal`. Multiple values OR together.",
+              "title": "Status"
+            }
+          },
+          {
+            "description": "Filter to sessions referencing this avatar.",
+            "in": "query",
+            "name": "avatar_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter to sessions referencing this avatar.",
+              "title": "Avatar Id"
+            }
+          },
+          {
+            "description": "Lower bound, inclusive. ISO-8601 UTC.",
+            "in": "query",
+            "name": "created_after",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Lower bound, inclusive. ISO-8601 UTC.",
+              "title": "Created After"
+            }
+          },
+          {
+            "description": "Upper bound, exclusive. ISO-8601 UTC.",
+            "in": "query",
+            "name": "created_before",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Upper bound, exclusive. ISO-8601 UTC.",
+              "title": "Created Before"
+            }
+          },
+          {
+            "description": "Page size. Default 20, max 100.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "description": "Page size. Default 20, max 100.",
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Pagination cursor \u2014 a `sess_\u2026` id from a previous page.",
+            "in": "query",
+            "name": "starting_after",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor \u2014 a `sess_\u2026` id from a previous page.",
+              "title": "Starting After"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unknown status filter value."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body or parameters failed validation."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "List sessions",
+        "tags": [
+          "sessions"
+        ]
+      },
+      "post": {
+        "description": "Allocate a worker and begin a realtime avatar session.\n\nReturns immediately with `status: queued`; poll `GET /v1/sessions/{id}` (or wait for the `session.first_frame` webhook) to see the worker pick the job up. Sessions count against your plan's concurrency cap; a 503 response with `code=at_capacity` and a `Retry-After` header means there are no free workers right now.",
+        "operationId": "create_session",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Protoface-Session-Grant",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Protoface-Session-Grant"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 255,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Invalid request body."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Insufficient credits or inactive billing."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflicting state (e.g. avatar not ready)."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body failed validation."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Rate limit exceeded."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "No worker capacity; retry later."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "Create a session",
+        "tags": [
+          "sessions"
+        ]
+      }
+    },
+    "/v1/sessions/{session_id}": {
+      "get": {
+        "description": "Return the current state of a session, including timing and usage counters.",
+        "operationId": "get_session",
+        "parameters": [
+          {
+            "description": "`sess_\u2026` prefixed ULID.",
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "description": "`sess_\u2026` prefixed ULID.",
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "No session with that id."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body or parameters failed validation."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "Retrieve a session",
+        "tags": [
+          "sessions"
+        ]
+      }
+    },
+    "/v1/sessions/{session_id}/end": {
+      "post": {
+        "description": "Terminate a session immediately. Idempotent: calling on an already-terminal session returns 200 with the existing state. The session transitions to `canceled` if it had not yet started, or `ending` (then `ended` once the worker drains) if it was running.",
+        "operationId": "end_session",
+        "parameters": [
+          {
+            "description": "`sess_\u2026` prefixed ULID.",
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "description": "`sess_\u2026` prefixed ULID.",
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "No session with that id."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body or parameters failed validation."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "End a session",
+        "tags": [
+          "sessions"
+        ]
+      }
+    },
+    "/v1/status": {
+      "get": {
+        "description": "Public status of the Protoface platform. Polled by the status page and operator dashboards. Unauthenticated.",
+        "operationId": "get_status",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Platform status roll-up",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/v1/usage": {
+      "get": {
+        "description": "Return aggregated usage for the calling org over a time range.\n\nPass either `period=current_month` (or `previous_month`) for convenience, **or** an explicit `period_start` / `period_end` pair. The two modes are mutually exclusive.",
+        "operationId": "get_usage",
+        "parameters": [
+          {
+            "description": "Convenience period selector; mutually exclusive with explicit range.",
+            "in": "query",
+            "name": "period",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "current_month",
+                    "previous_month"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Convenience period selector; mutually exclusive with explicit range.",
+              "title": "Period"
+            }
+          },
+          {
+            "description": "ISO-8601 UTC. Must be paired with `period_end`.",
+            "in": "query",
+            "name": "period_start",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ISO-8601 UTC. Must be paired with `period_end`.",
+              "title": "Period Start"
+            }
+          },
+          {
+            "description": "ISO-8601 UTC. Must be paired with `period_start`.",
+            "in": "query",
+            "name": "period_end",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ISO-8601 UTC. Must be paired with `period_start`.",
+              "title": "Period End"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Invalid `period` / range."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request body or parameters failed validation."
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "summary": "Get usage summary",
+        "tags": [
+          "usage"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "description": "Create, retrieve, list, and end realtime avatar sessions. Sessions stream audio in and video out; their lifecycle drives billing.",
+      "name": "sessions"
+    },
+    {
+      "description": "Avatar definitions. Includes platform stock avatars and customer-uploaded avatars.",
+      "name": "avatars"
+    },
+    {
+      "description": "Aggregate usage for billing reconciliation.",
+      "name": "usage"
+    },
+    {
+      "description": "Public platform metadata \u2014 currently just status. Unauthenticated. Internal load-balancer and task health probes exist on this host but are not part of the documented surface.",
+      "name": "platform"
+    },
+    {
+      "description": "Direct media sessions for the `pipecat-protoface` avatar video service.",
+      "name": "pipecat"
+    },
+    {
+      "description": "Public billing plan metadata for signup and pricing UI.",
+      "name": "billing"
+    }
+  ]
+}

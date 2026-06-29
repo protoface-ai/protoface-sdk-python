@@ -1,15 +1,17 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   pull_request:
   push:
     branches: [master]
-  workflow_dispatch:
 
 jobs:
-  test:
+  lint-test-build:
     name: Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -19,31 +21,28 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
+        uses: astral-sh/setup-uv@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --group dev
+        run: uv sync --group dev --python ${{ matrix.python-version }}
 
-      - name: ruff
+      - name: Run ruff
         run: uv run ruff check .
 
-      - name: ruff format
+      - name: Run ruff format check
         run: uv run ruff format --check .
 
-      - name: pyright
+      - name: Run pyright
         run: uv run pyright .
 
-      - name: pytest
-        run: uv run pytest
+      - name: Run tests
+        run: uv run python -m pytest
 
-      - name: build
-        run: |
-          uv run python -m build
-          uv run twine check dist/*
+      - name: Build package
+        run: uv build
+
+      - name: Check package
+        run: uv run python -m twine check dist/*

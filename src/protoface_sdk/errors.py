@@ -1,11 +1,4 @@
-"""Typed error hierarchy for the Protoface SDK.
-
-Mirrors the TypeScript SDK's ``errors.ts``: a base :class:`ProtofaceError`
-carrying the stable wire fields (``type``, ``code``, ``param``,
-``request_id``, ``status``) plus one subclass per HTTP/error category. Switch
-on :attr:`ProtofaceError.code` (a stable ``lower_snake_case`` string), never
-on :attr:`ProtofaceError.message` (human-readable, not stable).
-"""
+"""Typed errors raised by the Protoface SDK."""
 
 from __future__ import annotations
 
@@ -32,19 +25,13 @@ __all__ = [
 class ProtofaceError(Exception):
     """Base class for every error raised after a request reaches the API.
 
-    Switch on :attr:`code` (a stable ``lower_snake_case`` string), never on
-    the human-readable :attr:`message`.
+    Switch on :attr:`code`; :attr:`message` is human-readable and may change.
     """
 
-    #: Broad error category, e.g. ``invalid_request``, ``rate_limit``.
     type: str
-    #: Stable machine-readable subcode. Switch on this.
     code: str
-    #: Offending request field (dot-path), when applicable.
     param: str | None
-    #: Echo of the ``X-Request-Id`` response header. Quote this to support.
     request_id: str | None
-    #: HTTP status code of the response.
     status: int
 
     def __init__(
@@ -67,33 +54,32 @@ class ProtofaceError(Exception):
 
 
 class AuthenticationError(ProtofaceError):
-    """401 — missing or invalid API key."""
+    """401: missing or invalid API key."""
 
 
 class PermissionError(ProtofaceError):
-    """403 — authenticated but not permitted."""
+    """403: authenticated but not permitted."""
 
 
 class InvalidRequestError(ProtofaceError):
-    """400 — malformed request."""
+    """400: malformed request."""
 
 
 class NotFoundError(ProtofaceError):
-    """404 — no such resource."""
+    """404: no such resource."""
 
 
 class ConflictError(ProtofaceError):
-    """409 — conflicting state (e.g. avatar not ready)."""
+    """409: conflicting state."""
 
 
 class UnprocessableError(ProtofaceError):
-    """422 — request failed validation."""
+    """422: request failed validation."""
 
 
 class RateLimitError(ProtofaceError):
-    """429 — rate limited. Inspect :attr:`retry_after_seconds`."""
+    """429: rate limited."""
 
-    #: Seconds to wait before retrying, from the ``Retry-After`` header.
     retry_after_seconds: float | None
 
     def __init__(
@@ -123,16 +109,12 @@ class QuotaExceededError(ProtofaceError):
 
 
 class InternalError(ProtofaceError):
-    """5xx — server-side error."""
+    """5xx: server-side error."""
 
 
 class ServiceUnavailableError(ProtofaceError):
-    """503 — no worker capacity / temporarily unavailable.
+    """503: temporarily unavailable."""
 
-    Honor :attr:`retry_after_seconds`.
-    """
-
-    #: Seconds to wait before retrying, from the ``Retry-After`` header.
     retry_after_seconds: float | None
 
     def __init__(
@@ -160,8 +142,7 @@ class ServiceUnavailableError(ProtofaceError):
 class ProtofaceConnectionError(Exception):
     """Raised when a request never produced a parseable API response.
 
-    Covers network failures, timeouts, and aborted requests — anything that
-    happens before the server returns an HTTP status.
+    Covers network failures, timeouts, and aborted requests.
     """
 
     def __init__(self, message: str, cause: BaseException | None = None) -> None:

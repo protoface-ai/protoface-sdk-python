@@ -1,7 +1,4 @@
-"""Round-trip tests: the generated models must survive
-``model_dump(mode='json')`` → ``json`` → ``model_validate`` without loss, and
-must accept the representative examples committed in the OpenAPI spec.
-"""
+"""Generated model validation tests."""
 
 from __future__ import annotations
 
@@ -120,9 +117,7 @@ def test_naive_datetime_rejected() -> None:
 
 
 def test_spec_examples_validate() -> None:
-    """Every schema ``examples`` entry in the committed spec must validate
-    against its generated model — the strongest round-trip guarantee.
-    """
+    """Committed OpenAPI examples must validate against their SDK models."""
     spec = json.loads(_SPEC_PATH.read_text(encoding="utf-8"))
     schemas = spec["components"]["schemas"]
     models: dict[str, type[BaseModel]] = {

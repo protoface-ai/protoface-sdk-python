@@ -1,10 +1,4 @@
-"""``protoface_sdk`` - official Python SDK for the Protoface API.
-
-Wire models are generated from ``apispec/openapi.json`` (see
-:mod:`protoface_sdk._generated`, regenerated with ``make generate``); the
-ergonomic, hand-written client lives in :mod:`protoface_sdk._client`. The surface
-mirrors the public HTTP API.
-"""
+"""Official Python SDK for the Protoface API."""
 
 from __future__ import annotations
 

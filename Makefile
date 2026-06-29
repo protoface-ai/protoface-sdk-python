@@ -1,11 +1,8 @@
-# Dev targets for the Python SDK. Run from the repo root as `make <target>`.
 .PHONY: generate lint type test build check
 
 SPEC := apispec/openapi.json
 GENERATED := src/protoface_sdk/_generated.py
 
-# Regenerate the wire models from the committed OpenAPI spec, then normalize
-# the output to the SDK's ruff style (double quotes, import order).
 generate:
 	uv run datamodel-codegen \
 		--input $(SPEC) --input-file-type openapi \

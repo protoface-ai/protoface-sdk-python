@@ -1,7 +1,7 @@
 # protoface-sdk
 
 Official Python SDK for the [Protoface](https://protoface.com) API. This is a
-thin, typed backend SDK for the public HTTP API, built on
+typed backend SDK for the public HTTP API, built on
 [`httpx`](https://www.python-httpx.org/) and [Pydantic v2](https://docs.pydantic.dev/).
 
 Install the `protoface-sdk` distribution and import the `protoface_sdk` package.
@@ -49,8 +49,8 @@ client.list_billing_plans()
 client.get_status()                                            # unauthenticated platform status
 ```
 
-`Page` objects expose `.data`, `.has_more`, and `.next_cursor` (pass the cursor
-back as `starting_after` to fetch the next page).
+`Page` objects expose `.data`, `.has_more`, and `.next_cursor`. Pass
+`.next_cursor` back as `starting_after` to fetch the next page.
 
 ## Starting sessions
 
@@ -79,7 +79,7 @@ For framework-level realtime integrations, use the dedicated packages:
 ## Errors
 
 Every non-2xx response raises a typed `ProtofaceError` subclass
-(`AuthenticationError`, `RateLimitError`, `QuotaExceededError`, …). Switch on
+(`AuthenticationError`, `RateLimitError`, `QuotaExceededError`, etc.). Switch on
 the stable `error.code`, never on `error.message`:
 
 ```python
@@ -102,7 +102,7 @@ The client automatically retries `429` and `503` responses (honoring
 
 | Option            | Default                       | Notes                              |
 | ----------------- | ----------------------------- | ---------------------------------- |
-| `api_key`         | —                             | Required. `sk_live_...`            |
+| `api_key`         | required                      | `sk_live_...`                      |
 | `base_url`        | `https://api.protoface.com`   | Override for staging/local.        |
 | `timeout`         | `60.0`                        | Per-request timeout (seconds).     |
 | `max_retries`     | `2`                           | Retries for 429/503/network.       |
@@ -119,18 +119,15 @@ with ProtofaceClient(api_key=...) as client:
 ## Development
 
 Wire models in `src/protoface_sdk/_generated.py` are generated from
-`apispec/openapi.json`. The ergonomic client in `src/protoface_sdk/_client.py` is
-hand-written.
+`apispec/openapi.json`.
 
 ```sh
 make generate       # regenerate src/protoface_sdk/_generated.py from the spec
 make lint           # ruff check + format --check
 make type           # pyright (strict)
-make test           # pytest, incl. the spec-vs-SDK drift check
+make test           # pytest
 make build          # wheel/sdist build + twine check
 ```
 
-`make -C packages/sdk generate` runs `datamodel-code-generator` (a dev
-dependency declared in this package's `pyproject.toml`) and then normalizes
-the output with `ruff format` + `ruff check --fix` so the committed
-`_generated.py` matches the workspace lint style.
+`make generate` runs `datamodel-code-generator` and then normalizes the output
+with `ruff format` and `ruff check --fix`.

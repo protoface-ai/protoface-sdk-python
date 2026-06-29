@@ -1,12 +1,4 @@
-"""Public, ergonomically-named re-exports of the OpenAPI-generated models.
-
-The underlying models in :mod:`protoface_sdk._generated` are produced by
-``datamodel-code-generator`` from ``apispec/openapi.json`` (run
-``make generate``). Never edit the generated file by hand; edit the spec and
-regenerate. This module gives those models stable public names, adds the
-hand-written :class:`Page` pagination wrapper, and extends ``Session`` with
-the Python-first :meth:`Session.wait_until_running` convenience.
-"""
+"""Public model exports and lightweight SDK helpers."""
 
 from __future__ import annotations
 
@@ -45,13 +37,10 @@ from protoface_sdk._generated import (
     Session as _GeneratedSession,
 )
 
-#: Transport configs accepted/echoed on the public API, keyed by ``type``.
 TransportConfig = LiveKitTransportConfig | WebSocketTransportConfig | PipecatTransportConfig
 
-#: Relay details returned by ``POST /v1/pipecat/sessions``.
 PipecatRelayView = PipecatWebSocketRelayView
 
-#: Terminal session statuses — no further transitions occur.
 TERMINAL_SESSION_STATUSES: frozenset[SessionStatus] = frozenset(
     {SessionStatus.ended, SessionStatus.failed, SessionStatus.canceled}
 )
@@ -60,13 +49,7 @@ T = TypeVar("T")
 
 
 class Session(_GeneratedSession):
-    """Public session resource with a polling convenience.
-
-    Instances returned by the client carry a bound refresher so
-    :meth:`wait_until_running` can re-fetch the session. Instances you
-    construct yourself (e.g. in tests) won't have one until the client
-    returns them.
-    """
+    """Session resource with polling support for client-returned instances."""
 
     _refresh: Callable[[], Session] | None = PrivateAttr(default=None)
 
@@ -80,8 +63,7 @@ class Session(_GeneratedSession):
         timeout: float = 30.0,
         poll_interval: float = 1.0,
     ) -> Session:
-        """Poll :meth:`SessionsResource.get` until the session is ``running``
-        (or reaches a terminal state), then return the latest snapshot.
+        """Poll until the session is ``running`` or reaches a terminal state.
 
         Raises :class:`TimeoutError` if ``timeout`` seconds elapse first.
         """
@@ -106,11 +88,8 @@ class Session(_GeneratedSession):
 class Page(BaseModel, Generic[T]):
     """A single cursor-paginated page of results."""
 
-    #: Items on this page.
     data: list[T]
-    #: True when another page exists.
     has_more: bool
-    #: Opaque cursor; pass as ``starting_after`` to fetch the next page.
     next_cursor: str | None = None
 
 

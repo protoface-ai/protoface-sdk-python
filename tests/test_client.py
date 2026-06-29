@@ -1,6 +1,4 @@
-"""Unit tests for the synchronous client using an in-memory ``httpx``
-``MockTransport``. No network access — every response is canned.
-"""
+"""Unit tests for ``ProtofaceClient`` using ``httpx.MockTransport``."""
 
 from __future__ import annotations
 
@@ -61,9 +59,6 @@ def _error_body(error_type: str, code: str, message: str = "boom") -> dict[str, 
             "request_id": "req_01HXY",
         }
     }
-
-
-# --- success paths --------------------------------------------------------
 
 
 def test_create_session_success() -> None:
@@ -247,9 +242,6 @@ def test_avatars_create_multipart_upload() -> None:
     assert b"My Avatar" in bytes(captured["raw"])  # type: ignore[arg-type]
 
 
-# --- pagination -----------------------------------------------------------
-
-
 def test_list_sessions_pagination_shape() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params.get_list("status") == ["running", "queued"]
@@ -278,9 +270,6 @@ def test_list_avatars_empty_page() -> None:
     assert page.data == []
     assert page.has_more is False
     assert page.next_cursor is None
-
-
-# --- error mapping --------------------------------------------------------
 
 
 def test_401_maps_to_authentication_error() -> None:
@@ -339,8 +328,6 @@ def test_429_exhausted_raises_with_retry_after_seconds() -> None:
 
 
 def test_quota_exceeded_maps_by_type() -> None:
-    # 401/403/etc. map by status first; a `quota_exceeded` type on a status
-    # the SDK doesn't special-case (here 402) falls through to the type check.
     def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(402, json=_error_body("quota_exceeded", "credits_exhausted"))
 
@@ -366,9 +353,6 @@ def test_non_json_error_body_falls_back() -> None:
     assert isinstance(err, Exception)
     assert getattr(err, "code", None) == "unexpected_response"
     assert getattr(err, "status", None) == 500
-
-
-# --- wait_until_running ---------------------------------------------------
 
 
 def test_wait_until_running_polls_until_running() -> None:

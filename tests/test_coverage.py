@@ -1,9 +1,4 @@
-"""Spec-vs-SDK drift check.
-
-Mirror of the TypeScript SDK's ``test/coverage.test.ts``: every
-``operationId`` in the committed OpenAPI spec must have a matching SDK method,
-and every SDK method must reference an operationId that exists in the spec.
-"""
+"""Check that the SDK covers the committed OpenAPI operations."""
 
 from __future__ import annotations
 

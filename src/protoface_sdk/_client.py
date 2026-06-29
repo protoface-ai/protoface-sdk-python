@@ -1,8 +1,4 @@
-"""Synchronous ``httpx``-based client for the Protoface API.
-
-The ergonomic layer is hand-written against the committed OpenAPI spec; the
-wire models live in :mod:`protoface_sdk._generated`.
-"""
+"""Synchronous ``httpx`` client for the Protoface API."""
 
 from __future__ import annotations
 
@@ -32,38 +28,21 @@ from protoface_sdk.models import (
     UsageSummary,
 )
 
-#: Default base URL for the public API.
 DEFAULT_BASE_URL = "https://api.protoface.com"
 
 _RETRYABLE_STATUSES = frozenset({429, 503})
 
-# Bytes-like image payloads accepted by ``avatars.create``.
 ImageInput = bytes | bytearray | memoryview
 
 
 def _clean_params(
     params: Mapping[str, str | int | Sequence[str] | None],
 ) -> dict[str, Any]:
-    """Drop ``None`` values so they don't appear as empty query args."""
     return {key: value for key, value in params.items() if value is not None}
 
 
 class ProtofaceClient:
-    """Thin, typed client for the Protoface API.
-
-    Example::
-
-        from protoface_sdk import ProtofaceClient
-
-        client = ProtofaceClient(api_key=os.environ["PROTOFACE_API_KEY"])
-        session = client.sessions.create_livekit(
-            avatar_id="av_stock_001",
-            url=os.environ["LIVEKIT_URL"],
-            room_name="demo-room",
-            worker_token=worker_token,
-        )
-        session.wait_until_running(timeout=10)
-    """
+    """Client for the Protoface API."""
 
     sessions: SessionsResource
     avatars: AvatarsResource
@@ -104,8 +83,6 @@ class ProtofaceClient:
         self.pipecat = PipecatResource(self)
         self.usage = UsageResource(self)
 
-    # -- context management ------------------------------------------------
-
     def __enter__(self) -> ProtofaceClient:
         return self
 
@@ -116,8 +93,6 @@ class ProtofaceClient:
         """Close the underlying HTTP connection pool."""
         self._http.close()
 
-    # -- public endpoints --------------------------------------------------
-
     def get_status(self) -> StatusResponse:
         """Public platform status roll-up (unauthenticated endpoint)."""
         return StatusResponse.model_validate(self.request("GET", "/v1/status"))
@@ -126,8 +101,6 @@ class ProtofaceClient:
         """Current public billing plan catalog."""
         payload = self.request("GET", "/v1/billing/plans")
         return [PlanView.model_validate(item) for item in payload]
-
-    # -- transport ---------------------------------------------------------
 
     def _backoff_seconds(self, attempt: int) -> float:
         base = min(2.0**attempt, 8.0)
@@ -146,8 +119,7 @@ class ProtofaceClient:
     ) -> Any:
         """Perform a single request with timeout + retry handling.
 
-        Intended for internal use by the resource classes; returns the parsed
-        JSON body, or ``None`` for ``204`` responses.
+        Returns the parsed JSON body, or ``None`` for ``204`` responses.
         """
         query = _clean_params(params) if params else None
         headers: dict[str, str] = {}
@@ -202,7 +174,7 @@ class ProtofaceClient:
 
 
 class SessionsResource:
-    """``client.sessions`` — create, retrieve, list, and end sessions."""
+    """``client.sessions``: create, retrieve, list, and end sessions."""
 
     def __init__(self, client: ProtofaceClient) -> None:
         self._client = client
@@ -210,7 +182,6 @@ class SessionsResource:
     def _parse(self, payload: Any) -> Session:
         session = Session.model_validate(payload)
         session_id = session.id
-        # `_bind` is the documented internal hook for wiring up the refresher.
         return session._bind(lambda: self.get(session_id))  # pyright: ignore[reportPrivateUsage]
 
     def create(
@@ -310,7 +281,7 @@ class SessionsResource:
 
 
 class AvatarsResource:
-    """``client.avatars`` — list, retrieve, and create avatars."""
+    """``client.avatars``: list, retrieve, and create avatars."""
 
     def __init__(self, client: ProtofaceClient) -> None:
         self._client = client
@@ -365,7 +336,7 @@ class AvatarsResource:
 
 
 class PipecatResource:
-    """``client.pipecat`` — Pipecat avatar media sessions."""
+    """``client.pipecat``: Pipecat avatar media sessions."""
 
     sessions: PipecatSessionsResource
 
@@ -374,7 +345,7 @@ class PipecatResource:
 
 
 class PipecatSessionsResource:
-    """``client.pipecat.sessions`` — create Pipecat avatar media sessions."""
+    """``client.pipecat.sessions``: create Pipecat avatar media sessions."""
 
     def __init__(self, client: ProtofaceClient) -> None:
         self._client = client
@@ -412,7 +383,7 @@ class PipecatSessionsResource:
 
 
 class UsageResource:
-    """``client.usage`` — aggregated usage for the calling org."""
+    """``client.usage``: aggregated usage for the calling org."""
 
     def __init__(self, client: ProtofaceClient) -> None:
         self._client = client

@@ -115,21 +115,23 @@ requests, and for writes that include an `Idempotency-Key`.
 
 ## Protoface: More Quickstarts
 
-Protoface integrates with other popular voice AI platforms too.
+Protoface integrates with popular voice AI platforms.
 
-Clone a starter repo, add your keys to the environment file, and run. If an SDK or plugin is available separately, we've linked to it too.
+Clone a starter repo, add your keys to the environment file, and run.
 
-| Platform | Quickstart | Plugin |
-| --- | --- | --- |
-| LiveKit | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-livekit) | [Plugin](https://github.com/livekit/agents/tree/main/livekit-plugins/livekit-plugins-protoface) |
-| Pipecat | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-pipecat) | [Plugin](https://github.com/protoface-ai/protoface-plugin-pipecat) |
-| Agora | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-agora) |  |
-| Vapi | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-vapi) |  |
-| ElevenLabs Agents | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-elevenlabs-agents) |  |
-| OpenAI Realtime | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-openai-realtime) |  |
-| VideoSDK | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-videosdk) |  |
-| Python | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-python) | [SDK](https://github.com/protoface-ai/protoface-sdk-python) |
-| Node.js | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-node) | [SDK](https://github.com/protoface-ai/protoface-sdk-node) |
+If an SDK or plugin is available separately, we've linked to it instead.
+
+| Platform | Link |
+| --- | --- |
+| LiveKit | [Plugin](https://github.com/livekit/agents/tree/main/livekit-plugins/livekit-plugins-protoface) |
+| Pipecat | [Plugin](https://github.com/protoface-ai/protoface-plugin-pipecat) |
+| Agora | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-agora) |
+| Vapi | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-vapi) |
+| ElevenLabs Agents | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-elevenlabs-agents) |
+| OpenAI Realtime | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-openai-realtime) |
+| VideoSDK | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-videosdk) |
+| Python | [SDK](https://github.com/protoface-ai/protoface-sdk-python) |
+| Node.js | [SDK](https://github.com/protoface-ai/protoface-sdk-node) |
 
 ## License
 

@@ -1,0 +1,19 @@
+.github/workflows/release.yml
+  s_102ee28b9abd3e::t_498bdd1c849325 65-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "2463941a0a865808af83172e2254721f6465d675",
+  "prompts": {},
+  "sessions": {
+    "s_102ee28b9abd3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f14c1-bfec-7191-81a4-7f6b76564de7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    }
+  }
+}

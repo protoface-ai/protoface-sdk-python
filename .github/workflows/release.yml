@@ -62,6 +62,18 @@ jobs:
               )
           PY
 
+      - name: Run ruff
+        run: uv run ruff check .
+
+      - name: Run ruff format check
+        run: uv run ruff format --check .
+
+      - name: Run pyright
+        run: uv run pyright .
+
+      - name: Run tests
+        run: uv run python -m pytest
+
       - name: Build distributions
         run: uv build
 

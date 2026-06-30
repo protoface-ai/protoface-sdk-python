@@ -8,15 +8,19 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event.release.tag_name }}
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-24.04
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -38,7 +42,7 @@ jobs:
           exec(version_file.read_text(), namespace)
 
           expected_tag = f"v{namespace['__version__']}"
-          actual_tag = os.environ["GITHUB_REF_NAME"]
+          actual_tag = os.environ["RELEASE_TAG"]
           if actual_tag != expected_tag:
               raise SystemExit(
                   f"release tag {actual_tag} does not match expected tag {expected_tag}"

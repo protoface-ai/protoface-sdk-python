@@ -31,17 +31,17 @@ with ProtofaceClient(api_key=os.environ["PROTOFACE_API_KEY"]) as client:
     status = client.get_status()
     avatars = client.avatars.list(limit=10)
 
-    print(status.status)
+    print(status.status.value)
     print([avatar.id for avatar in avatars.data])
 ```
 
 ## Resources
 
 ```python
-client.sessions.create(request, idempotency_key=...)
+client.sessions.create(session_request, idempotency_key=...)
 client.sessions.create_livekit(avatar_id=..., url=..., room_name=..., worker_token=...)
 client.sessions.get(session_id)
-client.sessions.list(status=[...], avatar_id=..., limit=...)   # -> Page[Session]
+client.sessions.list(status=["running"], avatar_id=..., limit=...)  # -> Page[Session]
 client.sessions.end(session_id)
 
 client.avatars.list(limit=...)                                 # -> Page[Avatar]
@@ -63,16 +63,15 @@ client.get_status()
 ## LiveKit sessions
 
 `client.sessions.create_livekit(...)` starts the backend worker for a
-customer-owned LiveKit room. Your application still owns the LiveKit room and
-mints the worker token with its own LiveKit API key and secret; this SDK never
-touches those credentials.
+customer-owned LiveKit room. Your application still owns the room and mints a
+short-lived worker token with its own LiveKit API key and secret.
 
 ```python
 session = client.sessions.create_livekit(
     avatar_id="av_stock_001",
-    url=os.environ["LIVEKIT_URL"],
+    url=livekit_url,
     room_name="demo-room",
-    worker_token=os.environ["LIVEKIT_WORKER_TOKEN"],
+    worker_token=worker_token,
 )
 
 session = session.wait_until_running(timeout=10)
@@ -94,7 +93,7 @@ the stable `error.code`, never on `error.message`:
 from protoface_sdk import ProtofaceError, QuotaExceededError, RateLimitError
 
 try:
-    session = client.sessions.create(request)
+    client.sessions.create(session_request)
 except RateLimitError as err:
     print("rate limited:", err.code, err.retry_after_seconds)
 except QuotaExceededError as err:

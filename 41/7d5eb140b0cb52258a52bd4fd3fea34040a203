@@ -1,0 +1,30 @@
+src/protoface_sdk/__init__.py
+  s_102ee28b9abd3e::t_57c578224ed8e0 50,100
+  s_102ee28b9abd3e::t_41f047c24a266e 37,52,77,102
+tests/test_models.py
+  s_102ee28b9abd3e::t_b79792074094d7 18,78-79,133
+  s_102ee28b9abd3e::t_9163c16a4eef59 64,67
+  s_102ee28b9abd3e::t_3c6ca12b72109a 23,28
+  s_102ee28b9abd3e::t_7c095a7e54b5a5 65-66
+src/protoface_sdk/models.py
+  s_102ee28b9abd3e::t_24d6cad0035e07 35,130-136
+  s_102ee28b9abd3e::t_a0fef67805cba7 9,34,36-47,50-52,63,66-83,156,171
+  s_102ee28b9abd3e::t_4f2e1bedb0c725 84
+  s_102ee28b9abd3e::t_77a06f10ed79a3 137-138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "417d5eb140b0cb52258a52bd4fd3fea34040a203",
+  "prompts": {},
+  "sessions": {
+    "s_102ee28b9abd3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f14c1-bfec-7191-81a4-7f6b76564de7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    }
+  }
+}

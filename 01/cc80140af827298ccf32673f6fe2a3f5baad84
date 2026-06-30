@@ -1,0 +1,22 @@
+src/protoface_sdk/_client.py
+  s_102ee28b9abd3e::t_001a79b7afa050 220
+  s_102ee28b9abd3e::t_ca60cc87052500 218-219
+tests/test_client.py
+  s_102ee28b9abd3e::t_36c7945b8a038a 92-93,99,108-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "01cc80140af827298ccf32673f6fe2a3f5baad84",
+  "prompts": {},
+  "sessions": {
+    "s_102ee28b9abd3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f14c1-bfec-7191-81a4-7f6b76564de7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    }
+  }
+}

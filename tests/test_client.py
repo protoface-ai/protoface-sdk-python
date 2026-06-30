@@ -11,6 +11,7 @@ import pytest
 
 from protoface_sdk import (
     AuthenticationError,
+    InternalError,
     ProtofaceClient,
     ProtofaceConnectionError,
     QuotaExceededError,
@@ -60,6 +61,18 @@ def _error_body(error_type: str, code: str, message: str = "boom") -> dict[str, 
             "param": None,
             "request_id": "req_01HXY",
         }
+    }
+
+
+def _avatar_body(avatar_id: str = "av_demo") -> dict[str, object]:
+    return {
+        "object": "avatar",
+        "id": avatar_id,
+        "name": "Demo Avatar",
+        "status": "ready",
+        "runtime_type": "avtr1",
+        "is_demo": True,
+        "created_at": "2026-05-25T19:00:00Z",
     }
 
 
@@ -172,6 +185,28 @@ def test_create_pipecat_session_success() -> None:
     assert "/v1/pipecat/sessions/sess_test/media" in result.relay.media_url
 
 
+def test_get_session_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/v1/sessions/sess_01HXY"
+        return httpx.Response(200, json=_session_body(session_id="sess_01HXY"))
+
+    session = _client(handler).sessions.get("sess_01HXY")
+    assert session.id == "sess_01HXY"
+    assert session.avatar_id == "av_demo"
+
+
+def test_end_session_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path == "/v1/sessions/sess_01HXY/end"
+        return httpx.Response(200, json=_session_body(status="ending", session_id="sess_01HXY"))
+
+    session = _client(handler).sessions.end("sess_01HXY")
+    assert session.id == "sess_01HXY"
+    assert session.status is SessionStatus.ending
+
+
 def test_get_status_shape() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.path == "/v1/status"
@@ -245,6 +280,26 @@ def test_avatars_create_multipart_upload() -> None:
     assert b"My Avatar" in captured["raw"]
 
 
+def test_avatars_get_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/v1/avatars/av_demo"
+        return httpx.Response(200, json=_avatar_body())
+
+    avatar = _client(handler).avatars.get("av_demo")
+    assert avatar.id == "av_demo"
+    assert avatar.status.value == "ready"
+
+
+def test_avatars_delete_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "DELETE"
+        assert request.url.path == "/v1/avatars/av_demo"
+        return httpx.Response(204)
+
+    assert _client(handler).avatars.delete("av_demo") is None
+
+
 def test_list_sessions_pagination_shape() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params.get_list("status") == ["running", "queued"]
@@ -273,6 +328,27 @@ def test_list_avatars_empty_page() -> None:
     assert page.data == []
     assert page.has_more is False
     assert page.next_cursor is None
+
+
+def test_usage_summary_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/v1/usage"
+        assert request.url.params["period"] == "current_month"
+        return httpx.Response(
+            200,
+            json={
+                "period_start": "2026-05-01T00:00:00Z",
+                "period_end": "2026-06-01T00:00:00Z",
+                "billable_seconds": 120,
+                "sessions": 3,
+                "by_quality": {"standard": 120},
+            },
+        )
+
+    usage = _client(handler).usage.summary(period="current_month")
+    assert usage.billable_seconds == 120
+    assert usage.sessions == 3
 
 
 def test_401_maps_to_authentication_error() -> None:
@@ -350,12 +426,11 @@ def test_non_json_error_body_falls_back() -> None:
     def handler(_request: httpx.Request) -> httpx.Response:
         return httpx.Response(500, text="<html>gateway</html>")
 
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(InternalError) as exc_info:
         _client(handler, max_retries=0).avatars.get("av_demo")
     err = exc_info.value
-    assert isinstance(err, Exception)
-    assert getattr(err, "code", None) == "unexpected_response"
-    assert getattr(err, "status", None) == 500
+    assert err.code == "unexpected_response"
+    assert err.status == 500
 
 
 def test_wait_until_running_polls_until_running() -> None:

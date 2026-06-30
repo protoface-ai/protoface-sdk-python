@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+      contents: read
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+
+      - name: Verify tag is on master
+        run: |
+          git fetch --no-tags origin master
+          tag_commit="$(git rev-list -n 1 "$RELEASE_TAG")"
+          if ! git merge-base --is-ancestor "$tag_commit" origin/master; then
+            echo "release tag $RELEASE_TAG ($tag_commit) is not on origin/master"
+            exit 1
+          fi
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync --group dev --python 3.11
+
+      - name: Verify tag matches package version
+        run: |
+          uv run python - <<'PY'
+          import os
+          import pathlib
+
+          namespace = {}
+          version_file = pathlib.Path("src/protoface_sdk/version.py")
+          exec(version_file.read_text(), namespace)
+
+          expected_tag = f"v{namespace['__version__']}"
+          actual_tag = os.environ["RELEASE_TAG"]
+          if actual_tag != expected_tag:
+              raise SystemExit(
+                  f"release tag {actual_tag} does not match expected tag {expected_tag}"
+              )
+          PY
+
+      - name: Run ruff
+        run: uv run ruff check .
+
+      - name: Run ruff format check
+        run: uv run ruff format --check .
+
+      - name: Run pyright
+        run: uv run pyright .
+
+      - name: Run tests
+        run: uv run python -m pytest
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Check distributions
+        run: uv run python -m twine check dist/*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

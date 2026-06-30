@@ -123,25 +123,6 @@ with ProtofaceClient(api_key=...) as client:
     ...
 ```
 
-## Development
-
-Wire models in `src/protoface_sdk/_generated.py` are generated from
-`apispec/openapi.json`. Maintainers should sync that file from the canonical
-monorepo spec with `make sync-openapi`.
-
-```sh
-make sync-openapi  # copy ../protoface/apispec/openapi.json and regenerate models
-make openapi-check # compare the vendored spec with the sibling monorepo copy
-make generate       # regenerate src/protoface_sdk/_generated.py from the spec
-make lint           # ruff check + format --check
-make type           # pyright (strict)
-make test           # pytest
-make build          # wheel/sdist build + twine check
-```
-
-`make generate` runs `datamodel-code-generator` and then normalizes the output
-with `ruff format` and `ruff check --fix`.
-
 ## License
 
 Apache-2.0 - see [LICENSE](LICENSE).

@@ -1,0 +1,29 @@
+tests/test_client.py
+  s_102ee28b9abd3e::t_b6b8b3542bb238 145-148,185,328-339,341-345,348-353,416-417,452-473,519-523
+  s_102ee28b9abd3e::t_abee13421b2f9d 189-190
+src/protoface_sdk/_client.py
+  s_102ee28b9abd3e::t_44ed90f006fade 7,26,36,39,48-66,151,166,184,209,276,288,318-319,325,402-403,405-406
+src/protoface_sdk/models.py
+  s_102ee28b9abd3e::t_caa39741b0074e 95
+  s_102ee28b9abd3e::t_3e2ab34f9b797e 7,9,90-94
+  s_102ee28b9abd3e::t_c670d778fea8df 65,74-77
+  s_102ee28b9abd3e::t_4cde426d741528 96-97
+README.md
+  s_102ee28b9abd3e::t_09e45884b6291a 45,103-104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "a46029c5d967c71cd2685c81829d06fa70053ce4",
+  "prompts": {},
+  "sessions": {
+    "s_102ee28b9abd3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f14c1-bfec-7191-81a4-7f6b76564de7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    }
+  }
+}

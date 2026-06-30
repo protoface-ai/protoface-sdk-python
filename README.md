@@ -1,10 +1,8 @@
 # protoface-sdk
 
-Official Python SDK for the [Protoface](https://protoface.com) API. This is a
-typed backend SDK for the public HTTP API, built on
-[`httpx`](https://www.python-httpx.org/) and [Pydantic v2](https://docs.pydantic.dev/).
+Official Python SDK for the [Protoface](https://protoface.com) HTTP API.
 
-Install the `protoface-sdk` distribution and import the `protoface_sdk` package.
+Install `protoface-sdk` and import `protoface_sdk`.
 
 ## Installation
 
@@ -113,10 +111,8 @@ The client automatically retries `429` and `503` responses (honoring
 | `base_url`        | `https://api.protoface.com`   | Override for staging/local.        |
 | `timeout`         | `60.0`                        | Per-request timeout (seconds).     |
 | `max_retries`     | `2`                           | Retries for 429/503/network.       |
-| `default_headers` | `None`                        | Extra headers on every request.    |
-| `transport`       | `None`                        | Inject an `httpx.BaseTransport`.   |
 
-The client is a context manager and owns an `httpx.Client` connection pool:
+Use the client as a context manager to close connections:
 
 ```python
 with ProtofaceClient(api_key=...) as client:

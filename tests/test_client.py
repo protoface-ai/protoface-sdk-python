@@ -7,6 +7,7 @@ from typing import Any
 import httpx
 import pytest
 
+import protoface_sdk.models as sdk_models
 from protoface_sdk import (
     AuthenticationError,
     InternalError,
@@ -515,6 +516,40 @@ def test_wait_until_running_times_out() -> None:
     )
     with pytest.raises(TimeoutError):
         session.wait_until_running(timeout=0.05, poll_interval=0.01)
+
+
+def test_wait_until_running_caps_sleep_to_deadline(monkeypatch: pytest.MonkeyPatch) -> None:
+    now = {"value": 0.0}
+    sleeps: list[float] = []
+    refreshes = {"count": 0}
+
+    def monotonic() -> float:
+        return now["value"]
+
+    def sleep(seconds: float) -> None:
+        sleeps.append(seconds)
+        now["value"] += seconds
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.method == "POST":
+            return httpx.Response(201, json=_session_body(status="queued"))
+        refreshes["count"] += 1
+        return httpx.Response(200, json=_session_body(status="queued"))
+
+    monkeypatch.setattr(sdk_models.time, "monotonic", monotonic)
+    monkeypatch.setattr(sdk_models.time, "sleep", sleep)
+
+    session = _client(handler).sessions.create(
+        {
+            "avatar_id": "av_demo",
+            "transport": {"type": "livekit", "url": "u", "room_name": "r", "worker_token": "t"},
+        }
+    )
+    with pytest.raises(TimeoutError):
+        session.wait_until_running(timeout=0.5, poll_interval=10.0)
+
+    assert refreshes["count"] == 1
+    assert sleeps == [0.5]
 
 
 def test_wait_until_running_returns_ending_status() -> None:

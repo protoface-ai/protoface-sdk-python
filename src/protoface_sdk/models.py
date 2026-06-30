@@ -100,6 +100,7 @@ class Session(BaseModel):
         """
         current: Session = self
         deadline = time.monotonic() + timeout
+        first_refresh = True
         while True:
             if current.status == SessionStatus.running:
                 return current
@@ -110,12 +111,21 @@ class Session(BaseModel):
                 return current
             if current._refresh is None:
                 raise RuntimeError("wait_until_running requires a Session returned by the client.")
-            if time.monotonic() >= deadline:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
                 raise TimeoutError(
                     f"Session {current.id} did not reach 'running' within {timeout}s "
                     f"(last status: {current.status.value})."
                 )
-            time.sleep(poll_interval)
+            if first_refresh:
+                first_refresh = False
+            else:
+                time.sleep(max(0.0, min(poll_interval, remaining)))
+                if time.monotonic() >= deadline:
+                    raise TimeoutError(
+                        f"Session {current.id} did not reach 'running' within {timeout}s "
+                        f"(last status: {current.status.value})."
+                    )
             current = current._refresh()
 
 

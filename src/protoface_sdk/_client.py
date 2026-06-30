@@ -215,11 +215,9 @@ class SessionsResource:
         idempotency_key: str | None = None,
     ) -> Session:
         """Create a session. Returns immediately with ``status: queued``."""
-        body = (
-            request.model_dump(mode="json", exclude_none=True)
-            if isinstance(request, SessionCreateRequest)
-            else dict(request)
-        )
+        if not isinstance(request, SessionCreateRequest):
+            request = SessionCreateRequest.model_validate(request)
+        body = request.model_dump(mode="json", exclude_none=True, exclude_unset=True)
         return self._parse(
             self._client.request(
                 "POST", "/v1/sessions", json_body=body, idempotency_key=idempotency_key

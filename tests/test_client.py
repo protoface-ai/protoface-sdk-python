@@ -89,11 +89,14 @@ def test_create_session_success() -> None:
     session = client.sessions.create(
         {
             "avatar_id": "av_demo",
+            "max_duration_seconds": None,
+            "metadata": {"nullable": None},
             "transport": {
                 "type": "livekit",
                 "url": "wss://x.livekit.cloud",
                 "room_name": "r",
                 "worker_token": "tok",
+                "subscribe_to_identity": None,
             },
         }
     )
@@ -102,6 +105,9 @@ def test_create_session_success() -> None:
     assert session.id == "sess_01HXY"
     assert session.status is SessionStatus.queued
     assert captured["body"]["avatar_id"] == "av_demo"
+    assert "max_duration_seconds" not in captured["body"]
+    assert "subscribe_to_identity" not in captured["body"]["transport"]
+    assert captured["body"]["metadata"] == {"nullable": None}
 
 
 def test_create_livekit_builds_transport_and_sends_idempotency_key() -> None:

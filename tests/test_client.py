@@ -142,6 +142,10 @@ def test_create_pipecat_session_success() -> None:
     captured: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
+        if request.method == "GET":
+            assert request.url.path == "/v1/sessions/sess_01HXY"
+            return httpx.Response(200, json=_session_body(status="running"))
+
         assert request.method == "POST"
         assert request.url.path == "/v1/pipecat/sessions"
         captured["body"] = json.loads(request.content)
@@ -178,9 +182,12 @@ def test_create_pipecat_session_success() -> None:
         "metadata": {"customer_session_id": "pc_123"},
     }
     assert result.object == "pipecat.session"
+    assert isinstance(result.session, Session)
     assert result.session.id == "sess_01HXY"
     assert result.relay.type == "websocket"
     assert "/v1/pipecat/sessions/sess_test/media" in result.relay.media_url
+    settled = result.session.wait_until_running(timeout=1, poll_interval=0.0)
+    assert settled.status is SessionStatus.running
 
 
 def test_get_session_success() -> None:
@@ -318,11 +325,32 @@ def test_list_sessions_pagination_shape() -> None:
     assert page.next_cursor == "sess_b"
 
 
+def test_list_sessions_accepts_single_status() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.params.get_list("status") == ["running"]
+        return httpx.Response(
+            200,
+            json={"object": "list", "data": [], "has_more": False},
+        )
+
+    page = _client(handler).sessions.list(status=SessionStatus.running)
+    assert page.data == []
+
+
 def test_list_avatars_empty_page() -> None:
-    def handler(_request: httpx.Request) -> httpx.Response:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.params["scope"] == "platform"
+        assert request.url.params["q"] == "stock"
+        assert request.url.params["limit"] == "2"
+        assert request.url.params["starting_after"] == "av_1"
         return httpx.Response(200, json={"object": "list", "data": [], "has_more": False})
 
-    page = _client(handler).avatars.list()
+    page = _client(handler).avatars.list(
+        scope="platform",
+        q="stock",
+        limit=2,
+        starting_after="av_1",
+    )
     assert page.data == []
     assert page.has_more is False
     assert page.next_cursor is None
@@ -385,7 +413,8 @@ def test_429_retries_then_succeeds_honoring_retry_after() -> None:
         {
             "avatar_id": "av_demo",
             "transport": {"type": "livekit", "url": "u", "room_name": "r", "worker_token": "t"},
-        }
+        },
+        idempotency_key="idem-123",
     )
     assert calls["n"] == 2
     assert session.status is SessionStatus.queued
@@ -418,6 +447,28 @@ def test_network_error_maps_to_connection_error() -> None:
 
     with pytest.raises(ProtofaceConnectionError):
         _client(handler, max_retries=0).avatars.get("av_demo")
+
+
+def test_network_error_does_not_retry_non_idempotent_post() -> None:
+    calls = {"n": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        raise httpx.ConnectError("lost response", request=request)
+
+    with pytest.raises(ProtofaceConnectionError):
+        _client(handler, max_retries=2).sessions.create(
+            {
+                "avatar_id": "av_demo",
+                "transport": {
+                    "type": "livekit",
+                    "url": "u",
+                    "room_name": "r",
+                    "worker_token": "t",
+                },
+            }
+        )
+    assert calls["n"] == 1
 
 
 def test_non_json_error_body_falls_back() -> None:
@@ -465,3 +516,8 @@ def test_wait_until_running_times_out() -> None:
     )
     with pytest.raises(TimeoutError):
         session.wait_until_running(timeout=0.05, poll_interval=0.01)
+
+
+def test_wait_until_running_returns_ending_status() -> None:
+    session = Session.model_validate(_session_body(status="ending"))
+    assert session.wait_until_running(timeout=0.0).status is SessionStatus.ending

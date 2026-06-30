@@ -42,7 +42,7 @@ client.sessions.get(session_id)
 client.sessions.list(status=["running"], avatar_id=..., limit=...)  # -> Page[Session]
 client.sessions.end(session_id)
 
-client.avatars.list(limit=...)                                 # -> Page[Avatar]
+client.avatars.list(scope="platform", q="stock", limit=...)    # -> Page[Avatar]
 client.avatars.get(avatar_id)
 client.avatars.create(image=..., name=...)                     # multipart upload
 client.avatars.delete(avatar_id)
@@ -100,24 +100,8 @@ except ProtofaceError as err:
     print(err.code, err.request_id, err.status)
 ```
 
-The client automatically retries `429` and `503` responses (honoring
-`Retry-After`) and transient network failures, up to `max_retries` (default 2).
-
-## Configuration
-
-| Option            | Default                       | Notes                              |
-| ----------------- | ----------------------------- | ---------------------------------- |
-| `api_key`         | required                      | `sk_live_...`                      |
-| `base_url`        | `https://api.protoface.com`   | Override for staging/local.        |
-| `timeout`         | `60.0`                        | Per-request timeout (seconds).     |
-| `max_retries`     | `2`                           | Retries for 429/503/network.       |
-
-Use the client as a context manager to close connections:
-
-```python
-with ProtofaceClient(api_key=...) as client:
-    ...
-```
+The client retries `429`, `503`, and transient network failures for safe
+requests, and for writes that include an `Idempotency-Key`.
 
 ## License
 

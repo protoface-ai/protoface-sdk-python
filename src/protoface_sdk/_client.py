@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
 import httpx
@@ -23,6 +23,7 @@ from protoface_sdk.models import (
     QualityTier,
     Session,
     SessionCreateRequest,
+    SessionStatus,
     StatusResponse,
     TransportConfig,
     UsageSummary,
@@ -32,14 +33,35 @@ from protoface_sdk.version import __version__
 DEFAULT_BASE_URL = "https://api.protoface.com"
 
 _RETRYABLE_STATUSES = frozenset({429, 503})
+_RETRYABLE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 ImageInput = bytes | bytearray | memoryview
+SessionStatusFilter = SessionStatus | str | Sequence[SessionStatus | str]
 
 
 def _clean_params(
     params: Mapping[str, str | int | Sequence[str] | None],
 ) -> dict[str, Any]:
     return {key: value for key, value in params.items() if value is not None}
+
+
+def _status_param(status: SessionStatusFilter | None) -> list[str] | None:
+    if status is None:
+        return None
+    if isinstance(status, SessionStatus):
+        return [status.value]
+    if isinstance(status, str):
+        return [status]
+    return [item.value if isinstance(item, SessionStatus) else item for item in status]
+
+
+def _can_retry_request(method: str, idempotency_key: str | None) -> bool:
+    return method.upper() in _RETRYABLE_METHODS or idempotency_key is not None
+
+
+def _bind_session(session: Session, refresh: Callable[[str], Session]) -> Session:
+    session_id = session.id
+    return session._bind(lambda: refresh(session_id))  # pyright: ignore[reportPrivateUsage]
 
 
 class ProtofaceClient:
@@ -126,6 +148,7 @@ class ProtofaceClient:
         headers: dict[str, str] = {}
         if idempotency_key:
             headers["idempotency-key"] = idempotency_key
+        can_retry = _can_retry_request(method, idempotency_key)
 
         attempt = 0
         while True:
@@ -140,7 +163,7 @@ class ProtofaceClient:
                     headers=headers,
                 )
             except httpx.RequestError as exc:
-                if attempt < self._max_retries:
+                if can_retry and attempt < self._max_retries:
                     time.sleep(self._backoff_seconds(attempt))
                     attempt += 1
                     continue
@@ -158,6 +181,7 @@ class ProtofaceClient:
                 response.status_code in _RETRYABLE_STATUSES
                 and attempt < self._max_retries
                 and isinstance(error, RateLimitError | ServiceUnavailableError)
+                and can_retry
             ):
                 retry_after = error.retry_after_seconds
                 wait = retry_after if retry_after is not None else self._backoff_seconds(attempt)
@@ -182,8 +206,7 @@ class SessionsResource:
 
     def _parse(self, payload: Any) -> Session:
         session = Session.model_validate(payload)
-        session_id = session.id
-        return session._bind(lambda: self.get(session_id))  # pyright: ignore[reportPrivateUsage]
+        return _bind_session(session, self.get)
 
     def create(
         self,
@@ -250,7 +273,7 @@ class SessionsResource:
     def list(
         self,
         *,
-        status: Sequence[str] | None = None,
+        status: SessionStatusFilter | None = None,
         avatar_id: str | None = None,
         created_after: str | None = None,
         created_before: str | None = None,
@@ -262,7 +285,7 @@ class SessionsResource:
             "GET",
             "/v1/sessions",
             params={
-                "status": list(status) if status is not None else None,
+                "status": _status_param(status),
                 "avatar_id": avatar_id,
                 "created_after": created_after,
                 "created_before": created_before,
@@ -292,12 +315,14 @@ class AvatarsResource:
         *,
         limit: int | None = None,
         starting_after: str | None = None,
+        scope: str | None = None,
+        q: str | None = None,
     ) -> Page[Avatar]:
         """List avatars available to the calling org (incl. platform demos)."""
         payload = self._client.request(
             "GET",
             "/v1/avatars",
-            params={"limit": limit, "starting_after": starting_after},
+            params={"limit": limit, "starting_after": starting_after, "scope": scope, "q": q},
         )
         return Page[Avatar](
             data=[Avatar.model_validate(item) for item in payload["data"]],
@@ -374,13 +399,11 @@ class PipecatSessionsResource:
         if metadata is not None:
             body["metadata"] = dict(metadata)
 
-        return PipecatSessionView.model_validate(
-            self._client.request(
-                "POST",
-                "/v1/pipecat/sessions",
-                json_body=body,
-            )
+        view = PipecatSessionView.model_validate(
+            self._client.request("POST", "/v1/pipecat/sessions", json_body=body)
         )
+        view.session = _bind_session(view.session, self._client.sessions.get)
+        return view
 
 
 class UsageResource:

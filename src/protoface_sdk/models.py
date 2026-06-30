@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
-from typing import Generic, TypeVar
+from typing import Generic, Literal, TypeVar
 
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel, ConfigDict, PrivateAttr
 
 from protoface_sdk._generated import (
     ApiError,
@@ -18,7 +18,6 @@ from protoface_sdk._generated import (
     LiveKitAudioSource,
     LiveKitTransportConfig,
     PipecatSessionCreateRequest,
-    PipecatSessionView,
     PipecatTransportConfig,
     PipecatWebSocketRelayView,
     PlanView,
@@ -63,7 +62,7 @@ class Session(_GeneratedSession):
         timeout: float = 30.0,
         poll_interval: float = 1.0,
     ) -> Session:
-        """Poll until the session is ``running`` or reaches a terminal state.
+        """Poll until the session is ``running`` or no longer starting.
 
         Raises :class:`TimeoutError` if ``timeout`` seconds elapse first.
         """
@@ -72,7 +71,10 @@ class Session(_GeneratedSession):
         while True:
             if current.status == SessionStatus.running:
                 return current
-            if current.status in TERMINAL_SESSION_STATUSES:
+            if (
+                current.status == SessionStatus.ending
+                or current.status in TERMINAL_SESSION_STATUSES
+            ):
                 return current
             if current._refresh is None:
                 raise RuntimeError("wait_until_running requires a Session returned by the client.")
@@ -83,6 +85,14 @@ class Session(_GeneratedSession):
                 )
             time.sleep(poll_interval)
             current = current._refresh()
+
+
+class PipecatSessionView(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    object: Literal["pipecat.session"] = "pipecat.session"
+    relay: PipecatWebSocketRelayView
+    session: Session
 
 
 class Page(BaseModel, Generic[T]):

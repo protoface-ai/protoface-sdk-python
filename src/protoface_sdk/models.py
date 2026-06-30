@@ -16,6 +16,7 @@ from protoface_sdk._generated import (
     AvatarStatus,
     ErrorType,
     LiveKitAudioSource,
+    LiveKitSessionTransportConfig,
     LiveKitTransportConfig,
     PipecatSessionCreateRequest,
     PipecatTransportConfig,
@@ -31,20 +32,6 @@ from protoface_sdk._generated import (
     UsageSummary,
     WebSocketTransportConfig,
 )
-
-
-class LiveKitSessionTransportConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    audio_source: LiveKitAudioSource | None = LiveKitAudioSource.data_stream
-    room_name: str
-    subscribe_to_identity: str | None = None
-    synthetic_audio_if_no_input: bool | None = False
-    type: Literal["livekit"] = "livekit"
-    url: str
-    worker_identity: str | None = "protoface-worker"
-    worker_token: str | None = None
-
 
 TransportConfig = LiveKitTransportConfig | WebSocketTransportConfig | PipecatTransportConfig
 SessionTransportConfig = (

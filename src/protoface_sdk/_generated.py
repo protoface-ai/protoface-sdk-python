@@ -102,6 +102,39 @@ class LiveKitTransportConfig(BaseModel):
     )
 
 
+class LiveKitSessionTransportConfig(BaseModel):
+    """
+    LiveKit transport as returned on session resources.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    audio_source: LiveKitAudioSource | None = Field(
+        default=LiveKitAudioSource.data_stream,
+        description="How the worker receives audio. See LiveKitAudioSource.",
+    )
+    room_name: str = Field(..., description="Name of the LiveKit room the worker should join.")
+    subscribe_to_identity: str | None = Field(
+        default=None,
+        description="When `audio_source=track`, pin to this participant. Ignored otherwise.",
+    )
+    synthetic_audio_if_no_input: bool | None = Field(
+        default=False,
+        description="If True and no participant joins within 10 s, the worker falls back to a synthetic sine generator. Demo aid only; default off.",
+    )
+    type: Literal["livekit"] = "livekit"
+    url: str = Field(..., description="Customer's LiveKit URL, e.g. `wss://my-app.livekit.cloud`.")
+    worker_identity: str | None = Field(
+        default="protoface-worker",
+        description="Identity the worker presents inside the room.",
+    )
+    worker_token: str | None = Field(
+        default=None,
+        description="Write-only LiveKit JWT. It is accepted on create requests and omitted from session responses.",
+    )
+
+
 class MaxDurationSeconds(RootModel[int]):
     root: int = Field(..., ge=1, le=3600)
 
@@ -433,8 +466,8 @@ class Session(BaseModel):
         default=None, description="Set when worker emits `session.starting`."
     )
     status: SessionStatus
-    transport: LiveKitTransportConfig | WebSocketTransportConfig | PipecatTransportConfig = Field(
-        ..., discriminator="type"
+    transport: LiveKitSessionTransportConfig | WebSocketTransportConfig | PipecatTransportConfig = (
+        Field(..., discriminator="type")
     )
     usage: SessionUsage | None = None
 

@@ -26,6 +26,7 @@ from protoface_sdk import (
     UsageSummary,
 )
 from protoface_sdk._generated import AvatarList
+from protoface_sdk._generated import Session as GeneratedSession
 
 _SPEC_PATH = Path(__file__).resolve().parents[1] / "apispec" / "openapi.json"
 T = TypeVar("T", bound=BaseModel)
@@ -43,6 +44,25 @@ def _livekit() -> LiveKitTransportConfig:
         room_name="demo-room",
         worker_token="eyJ.fake",
     )
+
+
+def _session_payload() -> dict[str, object]:
+    return {
+        "id": "sess_01HXY",
+        "object": "session",
+        "status": "running",
+        "avatar_id": "av_demo",
+        "transport": {
+            "type": "livekit",
+            "url": "wss://my-app.livekit.cloud",
+            "room_name": "demo-room",
+        },
+        "quality": "standard",
+        "max_duration_seconds": 600,
+        "idle_timeout_seconds": 30,
+        "metadata": {"caller": "tests"},
+        "created_at": datetime(2026, 5, 25, 19, 0, 0, tzinfo=timezone.utc).isoformat(),
+    }
 
 
 def test_session_create_request_roundtrip() -> None:
@@ -75,6 +95,12 @@ def test_session_roundtrip() -> None:
         usage=SessionUsage(billable_seconds=3, frames=75),
     )
     assert _roundtrip(session) == session
+    assert isinstance(session.transport, LiveKitSessionTransportConfig)
+    assert session.transport.worker_token is None
+
+
+def test_generated_session_accepts_livekit_response_without_worker_token() -> None:
+    session = GeneratedSession.model_validate(_session_payload())
     assert isinstance(session.transport, LiveKitSessionTransportConfig)
     assert session.transport.worker_token is None
 

@@ -1,5 +1,3 @@
-"""Generated model validation tests."""
-
 from __future__ import annotations
 
 import json
@@ -117,7 +115,6 @@ def test_naive_datetime_rejected() -> None:
 
 
 def test_spec_examples_validate() -> None:
-    """Committed OpenAPI examples must validate against their SDK models."""
     spec = json.loads(_SPEC_PATH.read_text(encoding="utf-8"))
     schemas = spec["components"]["schemas"]
     models: dict[str, type[BaseModel]] = {

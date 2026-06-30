@@ -1,5 +1,3 @@
-"""Check that the SDK covers the committed OpenAPI operations."""
-
 from __future__ import annotations
 
 import json

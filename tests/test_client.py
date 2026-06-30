@@ -1,5 +1,3 @@
-"""Unit tests for ``ProtofaceClient`` using ``httpx.MockTransport``."""
-
 from __future__ import annotations
 
 import json

@@ -6,7 +6,7 @@ import time
 from collections.abc import Callable
 from typing import Generic, Literal, TypeVar
 
-from pydantic import BaseModel, ConfigDict, PrivateAttr
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, PrivateAttr
 
 from protoface_sdk._generated import (
     ApiError,
@@ -24,7 +24,6 @@ from protoface_sdk._generated import (
     QualityTier,
     SessionCreateRequest,
     SessionFailure,
-    SessionList,
     SessionStatus,
     SessionUsage,
     StatusComponent,
@@ -32,11 +31,25 @@ from protoface_sdk._generated import (
     UsageSummary,
     WebSocketTransportConfig,
 )
-from protoface_sdk._generated import (
-    Session as _GeneratedSession,
-)
+
+
+class LiveKitSessionTransportConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    audio_source: LiveKitAudioSource | None = LiveKitAudioSource.data_stream
+    room_name: str
+    subscribe_to_identity: str | None = None
+    synthetic_audio_if_no_input: bool | None = False
+    type: Literal["livekit"] = "livekit"
+    url: str
+    worker_identity: str | None = "protoface-worker"
+    worker_token: str | None = None
+
 
 TransportConfig = LiveKitTransportConfig | WebSocketTransportConfig | PipecatTransportConfig
+SessionTransportConfig = (
+    LiveKitSessionTransportConfig | WebSocketTransportConfig | PipecatTransportConfig
+)
 
 PipecatRelayView = PipecatWebSocketRelayView
 
@@ -47,8 +60,27 @@ TERMINAL_SESSION_STATUSES: frozenset[SessionStatus] = frozenset(
 T = TypeVar("T")
 
 
-class Session(_GeneratedSession):
+class Session(BaseModel):
     """Session resource with polling support for client-returned instances."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    avatar_id: str
+    created_at: AwareDatetime
+    ended_at: AwareDatetime | None = None
+    failed_at: AwareDatetime | None = None
+    failure: SessionFailure | None = None
+    first_frame_at: AwareDatetime | None = None
+    id: str
+    idle_timeout_seconds: int
+    max_duration_seconds: int
+    metadata: dict[str, str | int | float | bool | None]
+    object: Literal["session"] = "session"
+    quality: QualityTier
+    started_at: AwareDatetime | None = None
+    status: SessionStatus
+    transport: SessionTransportConfig = Field(..., discriminator="type")
+    usage: SessionUsage | None = None
 
     _refresh: Callable[[], Session] | None = PrivateAttr(default=None)
 
@@ -95,6 +127,15 @@ class PipecatSessionView(BaseModel):
     session: Session
 
 
+class SessionList(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    data: list[Session]
+    has_more: bool
+    next_cursor: str | None = None
+    object: Literal["list"] = "list"
+
+
 class Page(BaseModel, Generic[T]):
     """A single cursor-paginated page of results."""
 
@@ -112,6 +153,7 @@ __all__ = [
     "AvatarStatus",
     "ErrorType",
     "LiveKitAudioSource",
+    "LiveKitSessionTransportConfig",
     "LiveKitTransportConfig",
     "Page",
     "PipecatRelayView",
@@ -126,6 +168,7 @@ __all__ = [
     "SessionFailure",
     "SessionList",
     "SessionStatus",
+    "SessionTransportConfig",
     "SessionUsage",
     "StatusComponent",
     "StatusResponse",

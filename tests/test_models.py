@@ -15,15 +15,17 @@ from protoface_sdk import (
     AvatarStatus,
     ErrorType,
     LiveKitAudioSource,
+    LiveKitSessionTransportConfig,
     LiveKitTransportConfig,
     QualityTier,
     Session,
     SessionCreateRequest,
+    SessionList,
     SessionStatus,
     SessionUsage,
     UsageSummary,
 )
-from protoface_sdk._generated import AvatarList, SessionList
+from protoface_sdk._generated import AvatarList
 
 _SPEC_PATH = Path(__file__).resolve().parents[1] / "apispec" / "openapi.json"
 T = TypeVar("T", bound=BaseModel)
@@ -59,7 +61,10 @@ def test_session_roundtrip() -> None:
         id="sess_01HXY",
         status=SessionStatus.running,
         avatar_id="av_demo",
-        transport=_livekit(),
+        transport=LiveKitSessionTransportConfig(
+            url="wss://my-app.livekit.cloud",
+            room_name="demo-room",
+        ),
         quality=QualityTier.standard,
         max_duration_seconds=600,
         idle_timeout_seconds=30,
@@ -70,6 +75,8 @@ def test_session_roundtrip() -> None:
         usage=SessionUsage(billable_seconds=3, frames=75),
     )
     assert _roundtrip(session) == session
+    assert isinstance(session.transport, LiveKitSessionTransportConfig)
+    assert session.transport.worker_token is None
 
 
 def test_usage_summary_roundtrip() -> None:
@@ -123,6 +130,7 @@ def test_spec_examples_validate() -> None:
         "ApiError": ApiError,
         "ApiErrorEnvelope": ApiErrorEnvelope,
         "LiveKitTransportConfig": LiveKitTransportConfig,
+        "Session": Session,
         "SessionUsage": SessionUsage,
         "SessionCreateRequest": SessionCreateRequest,
         "SessionList": SessionList,

@@ -40,7 +40,6 @@ def _session_body(status: str = "queued", session_id: str = "sess_01HXY") -> dic
             "type": "livekit",
             "url": "wss://my-app.livekit.cloud",
             "room_name": "demo-room",
-            "worker_token": "[redacted]",
         },
         "quality": "standard",
         "max_duration_seconds": 600,

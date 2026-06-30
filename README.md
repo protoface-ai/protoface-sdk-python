@@ -1,6 +1,6 @@
 # protoface-sdk
 
-Official Python SDK for the [Protoface](https://protoface.com) HTTP API.
+Official Python SDK for the [Protoface](https://protoface.com) API.
 
 Install `protoface-sdk` and import `protoface_sdk`.
 

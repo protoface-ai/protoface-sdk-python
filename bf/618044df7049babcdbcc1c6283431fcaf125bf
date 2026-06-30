@@ -1,0 +1,24 @@
+tests/test_models.py
+  s_102ee28b9abd3e::t_f1a8604d9ed533 49-67,99-101
+  s_102ee28b9abd3e::t_12242e380aa987 29,102-104
+src/protoface_sdk/models.py
+  s_102ee28b9abd3e::t_9f656194659a3e 19
+src/protoface_sdk/_generated.py
+  s_102ee28b9abd3e::t_357a5169f89a07 105-137,469-470
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "bf618044df7049babcdbcc1c6283431fcaf125bf",
+  "prompts": {},
+  "sessions": {
+    "s_102ee28b9abd3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f14c1-bfec-7191-81a4-7f6b76564de7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    }
+  }
+}

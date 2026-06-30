@@ -1,0 +1,20 @@
+README.md
+  s_102ee28b9abd3e::t_792de8f8bf1cc9 115
+  s_102ee28b9abd3e::t_ef729afc756552 3,5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "6e031cf5a76524acf5bab961d47298d432034d59",
+  "prompts": {},
+  "sessions": {
+    "s_102ee28b9abd3e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f14c1-bfec-7191-81a4-7f6b76564de7",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Protoface Team <295041388+protoface-team@users.noreply.github.com>"
+    }
+  }
+}

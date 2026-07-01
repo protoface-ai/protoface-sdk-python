@@ -1,4 +1,4 @@
-# protoface-sdk
+# Protoface Python SDK
 
 Official Python SDK for the [Protoface](https://protoface.com) API.
 

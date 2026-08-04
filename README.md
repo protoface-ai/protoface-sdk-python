@@ -125,6 +125,7 @@ If an SDK or plugin is available separately, we've linked to it instead.
 | --- | --- |
 | LiveKit | [Plugin](https://github.com/livekit/agents/tree/main/livekit-plugins/livekit-plugins-protoface) [Official Docs](https://docs.livekit.io/agents/models/avatar/plugins/protoface/)|
 | Pipecat | [Plugin](https://github.com/protoface-ai/protoface-plugin-pipecat) [Official Docs](https://docs.pipecat.ai/api-reference/server/services/video/protoface)|
+| Protoface Managed Conversations | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-conversations) |
 | Agora | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-agora) |
 | Vapi | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-vapi) |
 | ElevenLabs Agents | [Starter Repo](https://github.com/protoface-ai/protoface-quickstart-elevenlabs-agents) |

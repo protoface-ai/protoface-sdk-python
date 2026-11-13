@@ -1,6 +1,6 @@
-# Protoface Python SDK
+# Protoface Realtime Python SDK
 
-Official Python SDK for the [Protoface](https://protoface.com) API.
+Official Python SDK for the [Protoface Realtime](https://protoface.com) API.
 
 Install `protoface-sdk` and import `protoface_sdk`.
 
